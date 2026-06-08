@@ -18,9 +18,9 @@ export async function GET(req: NextRequest) {
     const user = await prisma.user.findFirst({
       where: { id: payload.id, deletedAt: null },
       select: {
-        id: true, email: true, username: true,
-        namaLengkap: true, role: true,
-        department: true, title: true,
+        id: true, emailAddrs: true, userName: true,
+        fullName: true, role: true,
+        department: true, titleUser: true,
       },
     });
 
