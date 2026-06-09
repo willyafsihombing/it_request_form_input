@@ -12,6 +12,7 @@ export default function PrintButtons() {
     window.print();
   };
 
+  // menjadi printPDF
 //   const handleDownloadPDF = async () => {
 //   setDownloading(true);
 //   try {
@@ -172,7 +173,7 @@ const handleDownloadPDF = async () => {
       </button>
 
       {/* Print */}
-      <button
+      {/* <button
         onClick={handlePrint}
         style={{
           padding: '8px 16px',
@@ -190,11 +191,11 @@ const handleDownloadPDF = async () => {
         }}
       >
         🖨️ Print
-      </button>
+      </button> */}
 
       {/* Kembali */}
       <button
-        onClick={() => router.back()}
+        onClick={() => router.push('/dashboard/requests')}
         style={{
           padding: '8px 16px',
           background: '#64748b',
@@ -216,7 +217,7 @@ const handleDownloadPDF = async () => {
       <div style={{
         position: 'fixed',
         top: 12,
-        right: 370,
+        right: 270,
         zIndex: 100,
         background: '#fef9c3',
         border: '1px solid #fbbf24',

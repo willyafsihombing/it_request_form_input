@@ -2,10 +2,11 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { Search, Filter, ChevronLeft, ChevronRight, Eye, Printer, Trash2, RefreshCw } from 'lucide-react';
+import { Search, Filter, ChevronLeft, ChevronRight, Eye, Printer, Trash2, RefreshCw, X } from 'lucide-react';
 import { cn, formatDate, timeAgo } from '@/lib/utils';
 import { StatusBadge, PriorityBadge } from '@/components/ui/badges';
 import type { RequestStatus, RequestPriority } from '@/types';
+import { requestApi } from '@/lib/api';
 
 interface RequestRow {
   id: string;
@@ -33,50 +34,61 @@ export default function RequestsTable() {
   const [status,   setStatus]   = useState('all');
   const [priority, setPriority] = useState('all');
 
+  const [showModal, setShowModal]       = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; formNumber: string } | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false)
+  const [successMessage, setSuccessMessage] = useState('')
+  
+  const handleDeleteClick = (id: string, formNumber: string) => {
+  setDeleteTarget({ id, formNumber });
+  setShowModal(true);
+};
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteTarget) return;
+    setLoading(true);
+    try {
+      await requestApi.delete(deleteTarget.id);
+      setShowModal(false);
+      setDeleteTarget(null);
+      fetchRequests();
+
+      setSuccessMessage(`Request ${deleteTarget.formNumber} Deleted Successfully`)
+      setTimeout(() => setSuccessMessage(''), 3000);
+    } catch (err: any) {
+      alert(`Gagal menghapus: ${err.message}`);
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
   const fetchRequests = useCallback(async () => {
     setLoading(true);
-    const params = new URLSearchParams({
-      page:     String(page),
-      limit:    '15',
-      status,
-      priority,
-      ...(search ? { search } : {}),
-    });
     try {
-      const res  = await fetch(`/api/requests?${params}`);
-      const data = await res.json();
+    const data = await requestApi.getAll({
+      page,
+      limit: 15,
+      status: status !== 'all' ? status : undefined,
+      priority:priority !== 'all' ? priority : undefined,
+      search: search || undefined,
+    }) as any;
+
+      console.log('API response:', data);
+      console.log('First request:', data.requests?.[0]);
+      
       setRequests(data.requests ?? []);
       setTotal(data.total ?? 0);
-      setPages(data.pages ?? 1);
-    } catch {
-      setRequests([]);
+      setPages(data.pages ?? 1)
+    }catch (err){
+      console.log('fetch requests error', err)
+      setRequests([])
     } finally {
-      setLoading(false);
+      setLoading (false)
     }
   }, [page, status, priority, search]);
 
   useEffect(() => { fetchRequests(); }, [fetchRequests]);
   useEffect(() => { setPage(1); }, [search, status, priority]);
-
-  const handleDelete = async (id: string, formNumber: string) => {
-  if (!confirm(`Hapus request ${formNumber}?`)) return;
-  
-  try {
-    const res = await fetch(`/api/requests/${id}`, { method: 'DELETE' });
-    
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
-      console.error('Delete error:', err);
-      alert(`Gagal menghapus: ${err.error || 'Terjadi kesalahan'}`);
-      return;
-    }
-    
-    fetchRequests();
-  } catch (err) {
-    console.error('Delete failed:', err);
-    alert('Gagal menghubungi server');
-  }
-};
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
@@ -209,7 +221,7 @@ export default function RequestsTable() {
                         <Printer size={15} />
                       </Link>
                       <button
-                        onClick={() => handleDelete(req.id, req.formNumber)}
+                        onClick={() => handleDeleteClick(req.id, req.formNumber)}
                         className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors"
                         title="Hapus"
                       >
@@ -223,6 +235,74 @@ export default function RequestsTable() {
           </tbody>
         </table>
       </div>
+
+      {successMessage && (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 bg-green-600 text-white px-4 py-3 rounded-xl shadow-lg animate-in slide-in-from-bottom-2">
+          <span className="text-lg">✅</span>
+          <span className="text-sm font-medium">{successMessage}</span>
+          <button
+            onClick={() => setSuccessMessage('')}
+            className="ml-2 text-white/70 hover:text-white"
+          >
+            <X size={14} />
+          </button>
+        </div>
+      )}
+      
+      {/* Modal Delete */}
+      {showModal && deleteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            onClick={() => setShowModal(false)} />
+
+          <div className="relative bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm mx-4 z-10">
+            <button
+              onClick={() => setShowModal(false)}
+              className="absolute top-4 right-4 p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+            >
+              <X size={16} />
+            </button>
+
+            <div className="flex items-center justify-center w-12 h-12 bg-red-50 rounded-xl mb-4">
+              <Trash2 size={22} className="text-red-500" />
+            </div>
+
+            <h3 className="text-base font-semibold text-slate-800 mb-1">
+              Hapus Request?
+            </h3>
+            <p className="text-sm text-slate-500 mb-6">
+              Request <span className="font-semibold text-slate-700">{deleteTarget.formNumber}</span> akan dihapus permanen.
+            </p>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowModal(false)}
+                disabled={deleteLoading}
+                className="flex-1 py-2.5 text-sm font-semibold border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 transition-colors"
+              >
+                Batal
+              </button>
+              <button
+                onClick={handleDeleteConfirm} // ← callback, bukan langsung dipanggil
+                disabled={deleteLoading}
+                className="flex-1 py-2.5 text-sm font-semibold bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white rounded-xl transition-colors flex items-center justify-center gap-2"
+              >
+                {deleteLoading ? (
+                  <>
+                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    Menghapus...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 size={14} />
+                    Ya, Hapus
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>    
+      )}
 
       {/* Pagination */}
       <div className="px-5 py-3 border-t border-slate-100 flex items-center justify-between">

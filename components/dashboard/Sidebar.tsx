@@ -7,6 +7,7 @@ import {
   Monitor, Building2, ChevronRight,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import LogoutButton from '@/components/layout/logoutButton';
 
 const NAV_ITEMS = [
   { href: '/dashboard',          label: 'Dashboard',       icon: LayoutDashboard },
@@ -69,6 +70,9 @@ export default function Sidebar() {
           );
         })}
       </nav>
+      <div className="mt-auto p-4 border-t border-slate-100">
+            <LogoutButton />
+      </div>
 
       {/* Footer */}
       <div className="px-4 py-4 border-t border-slate-700/60">

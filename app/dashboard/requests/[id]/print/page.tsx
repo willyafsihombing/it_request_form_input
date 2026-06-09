@@ -1,8 +1,8 @@
 import { notFound } from 'next/navigation';
-import { prisma } from '@/lib/prisma';
 import type { ITRequest } from '@/types';
 import PrintButtons from '@/app/dashboard/requests/[id]/print/printButton'; // ← tambahkan import ini
 
+const API = process.env.API_URL || 'http://localhost:8080';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,25 +20,52 @@ function CBox({ on, label }: { on: boolean; label?: string }) {
   );
 }
 
-export default async function PrintPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  const req = await prisma.request.findUnique({ where: { id } });  if (!req) notFound();
-  const r = req as unknown as ITRequest;
+export default async function PrintPage({ params } : { params: Promise<{ id: string }> }){
+  const { id } = await params
 
-  const CYAN   = '#00BCD4';
+  let r: ITRequest
+  try{
+  const res = await fetch(`${API}/api/requests/${id}`, {
+    cache: 'no-store',
+    headers: { 'Content-Type': 'application/json' },
+ });
+
+  if (!res.ok) notFound();
+    r = await res.json();
+  }catch (err) {
+    console.error('Fetch print error:', err);
+    notFound();
+  }
+
+  const CYAN  = '#00b0f0';
   const YELLOW = '#FFFF00';
-  const WHITE = '#ffffff'
+  const WHITE  = '#ffffff';
 
-    const cell = (bg = 'white', xtra: React.CSSProperties = {}): React.CSSProperties => ({
+  //  const cell = (bg = 'white', xtra: React.CSSProperties = {}): React.CSSProperties => ({
+  //   border: '0.7px solid #555',
+  //   padding: '0 4px',
+  //   verticalAlign: 'middle',
+  //   textAlign: 'left',
+  //   fontFamily: 'Arial, sans-serif',
+  //   fontSize: 10.5,
+  //   background: bg,
+  //   height: 22,
+  //   lineHeight: '22px',
+  //   whiteSpace: 'nowrap',
+  //   overflow: 'hidden',
+  //   ...xtra,
+  // });
+
+  const cell = (bg = 'white', xtra: React.CSSProperties = {}): React.CSSProperties => ({
     border: '0.7px solid #555',
-    padding: '0 4px',
+    padding: '0 3px',       
     verticalAlign: 'middle',
     textAlign: 'left',
     fontFamily: 'Arial, sans-serif',
-    fontSize: 10.5,
+    fontSize: 11,          
     background: bg,
-    height: 22,
-    lineHeight: '22px',
+    height: 16,            
+    lineHeight: '16px',     
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     ...xtra,
@@ -48,34 +75,55 @@ export default async function PrintPage({ params }: { params: Promise<{ id: stri
   <>
         {/* {r.formNumber} — IT Request Form */}
         <style>{`
+          // * { box-sizing: border-box; margin: 0; padding: 0; }
+          // @page { size: A4 landscape; margin: 8mm;margin-top: 8mm;margin-bottom: 8mm; }
+          // body { background: white; font-family: Arial, sans-serif; }
+          // @media print {
+          //   body { margin: 0; }
+          //   .no-print { display: none !important; }
+          //   * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+          // }
+
+          /* Hilangkan header & footer browser */
+          // @page {
+          //   margin: 8mm;
+          // }
+          // html {
+          //   -webkit-print-color-adjust: exact;
+          // }
+
+        //   .print-btn {
+        //     position: fixed; top: 12px; right: 12px; z-index: 100;
+        //     display: flex; gap: 8px;
+        //   }
+        //   .print-btn button, .print-btn a {
+        //     padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer;
+        //     font-size: 13px; font-weight: 600; text-decoration: none;
+        //     display: inline-flex; align-items: center; gap: 6px;
+        //   }
+        //   .btn-print  { background: #16a34a; color: white; }
+        //   .btn-close  { background: #64748b; color: white; }
+        // `}</style>
+
+        <style>{`
           * { box-sizing: border-box; margin: 0; padding: 0; }
-          @page { size: A4 landscape; margin: 8mm;margin-top: 8mm;margin-bottom: 8mm; }
+          @page { size: A4 landscape; margin: 4mm; }
           body { background: white; font-family: Arial, sans-serif; }
           @media print {
             body { margin: 0; }
             .no-print { display: none !important; }
             * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            #print-area {
+              transform: scale(0.82);
+              transform-origin: top left;
+              width: 122%;
+            }
           }
-
-          /* Hilangkan header & footer browser */
-          @page {
-            margin: 8mm;
-          }
-          html {
-            -webkit-print-color-adjust: exact;
-          }
-
+          html { -webkit-print-color-adjust: exact; }
           .print-btn {
             position: fixed; top: 12px; right: 12px; z-index: 100;
             display: flex; gap: 8px;
           }
-          .print-btn button, .print-btn a {
-            padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer;
-            font-size: 13px; font-weight: 600; text-decoration: none;
-            display: inline-flex; align-items: center; gap: 6px;
-          }
-          .btn-print  { background: #16a34a; color: white; }
-          .btn-close  { background: #64748b; color: white; }
         `}</style>
 
         {/* Print / Close buttons */}
@@ -84,7 +132,7 @@ export default async function PrintPage({ params }: { params: Promise<{ id: stri
         </div>
 
         {/* ── FORM ── */}
-        <div id='print-area' style={{ padding: '8mm 10mm', maxWidth: '35cm', margin: '0 auto' }}>
+        <div id='print-area' style={{ padding: '10mm 40mm', maxWidth: '40cm', margin: '0 auto' }}>
 
           {/* Title — di luar tabel */}
           <div style={{ position: 'relative', textAlign: 'center', fontFamily: 'Arial', marginBottom: 2 }}>
@@ -167,18 +215,18 @@ export default async function PrintPage({ params }: { params: Promise<{ id: stri
 
               {/* Section Headers */}
               <tr>
-                <td colSpan={5} style={cell(CYAN, { fontWeight: 'bold' })}>Requester Information</td>
-                <td colSpan={3} style={cell(CYAN, { fontWeight: 'bold' })}>System &amp; Network</td>
-                <td colSpan={3} style={cell()}>
-                  <div style={{ display: 'flex', gap: 8 }}>
+                <td colSpan={5} style={cell(CYAN, { fontWeight: 'bold', fontSize:'11px' })}>Requester Information</td>
+                <td colSpan={3} style={cell(CYAN, { fontWeight: 'bold', fontSize:'11px' })}>System &amp; Network</td>
+                <td colSpan={4} style={cell(CYAN)}>
+                  <div style={{ display: 'flex', gap: 1 }}>
                     <CBox on={r.snAdd}       label="Add" />
                     <CBox on={r.snChange}    label="Change" />
                     <CBox on={r.snTerminate} label="Terminate" />
                   </div>
                 </td>
-                <td colSpan={5} style={cell(CYAN, { fontWeight: 'bold' })}>Hardware &amp; Software</td>
+                <td colSpan={4} style={cell(CYAN, { fontWeight: 'bold', fontSize:'11px' })}>Hardware &amp; Software</td>
                 <td colSpan={4} style={cell(CYAN)}>
-                  <div style={{ display: 'flex', gap: 8 }}>
+                  <div style={{ display: 'flex', justifyContent:'center', gap: 4 }}>
                     <CBox on={r.hwAdd}       label="Add" />
                     <CBox on={r.hwChange}    label="Change" />
                     <CBox on={r.hwTerminate} label="Terminate" />
@@ -225,7 +273,7 @@ export default async function PrintPage({ params }: { params: Promise<{ id: stri
 
               {/* Recipient header | S&N Other | H&S Other */}
               <tr>
-                <td colSpan={5} style={cell(CYAN, { fontWeight: 'bold' })}>Recipient Information</td>
+                <td colSpan={5} style={cell(CYAN, { fontWeight: 'bold', fontSize:'11px' })}>Recipient Information</td>
                 <td colSpan={2} style={cell('white', { border: 'none' })}>Other</td>
                 <td colSpan={5} style={cell()}>{r.snOther}</td>
                 <td colSpan={2} style={cell('white', { border: 'none' })}>Other</td>
@@ -236,10 +284,10 @@ export default async function PrintPage({ params }: { params: Promise<{ id: stri
               <tr>
                 <td style={cell(YELLOW)}>Company</td>
                 <td colSpan={4} style={cell(YELLOW, { border: 'none', borderBottom: '0.7px solid' })}>{r.recCompany}</td>
-                <td colSpan={2} style={cell(CYAN, { fontWeight: 'bold' })}>ERP</td>
+                <td colSpan={2} style={cell(CYAN, { fontWeight: 'bold',  fontSize:'11px' })}>ERP</td>
                 <td colSpan={3} style={cell(CYAN,{border:'none',borderLeft:'0.1px #eee'})}><CBox on={r.erpPronto}      label="PRONTO" /></td>
                 <td colSpan={4} style={cell(CYAN)}><CBox on={r.erpSmartMining} label="SMART MINING" /></td>
-                <td colSpan={6} style={cell()}>
+                <td colSpan={6} style={cell(CYAN)}>
                     <div style={{ display: 'flex', gap: 50 }}>
                       <CBox on={r.erpAdd}       label="Add" />
                       <CBox on={r.erpChange}    label="Change" />
@@ -298,7 +346,7 @@ export default async function PrintPage({ params }: { params: Promise<{ id: stri
           </table>
 
           {/* Additional Desc + Cost Code */}
-          <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '-0.7px' }}>
+          {/* <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '-0.7px' }}>
             <tbody>
               <tr>
                 <td style={{ border: '0.7px solid #555', padding: '4px 6px', width: '30%', verticalAlign: 'top', fontFamily: 'Arial', fontSize: 10.5 }}>
@@ -313,10 +361,43 @@ export default async function PrintPage({ params }: { params: Promise<{ id: stri
                 </td>
               </tr>
             </tbody>
+          </table> */}
+
+          <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '-0.7px' }}>
+            <tbody>
+              <tr>
+                <td style={{ 
+                  border: '0.7px solid #555', padding: '3px 5px', 
+                  width: '50%', verticalAlign: 'top', 
+                  fontFamily: 'Arial', fontSize: 9.5 
+                }}>
+                  <div style={{ fontSize: 8, color: '#444', marginBottom: 2 }}>
+                    Additional Description (Describe the Software / Hardware / Service / Privilege requested)
+                  </div>
+                  <div style={{ 
+                    height: 105,            // ← fixed height
+                    overflow: 'hidden',
+                    whiteSpace: 'pre-line', 
+                    fontSize: 9.5, 
+                    lineHeight: 1.4 
+                  }}>
+                    {r.additionalDesc}
+                  </div>
+                </td>
+                <td style={{ 
+                  border: '0.7px solid #555', padding: '3px 5px', 
+                  width: '50%', verticalAlign: 'top', 
+                  fontFamily: 'Arial', fontSize: 9.5 
+                }}>
+                  <div style={{ fontWeight: 'bold', marginBottom: 2, fontSize: 9.5 }}>COST CODE / COA :</div>
+                  <div style={{ fontSize: 9.5 }}>{r.costCode}</div>
+                </td>
+              </tr>
+            </tbody>
           </table>
 
           {/* Justification + Technical Comment */}
-          <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '-0.7px' }}>
+          {/* <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '-0.7px' }}>
             <tbody>
               <tr>
                 <td style={{ border: '0.7px solid #555', padding: '3px 6px', width: '50%', fontSize: 9.5, fontFamily: 'Arial' }}>
@@ -342,13 +423,63 @@ export default async function PrintPage({ params }: { params: Promise<{ id: stri
                 </td>
               </tr>
             </tbody>
-          </table>
+          </table> */}
 
-          {/* Signatures */}
           <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '-0.7px' }}>
             <tbody>
               <tr>
-                <td colSpan={3} style={{ border: '0.7px solid #555', padding: '3px 8px', background: CYAN, fontWeight: 'bold', fontFamily: 'Arial', fontSize: 11 }}>
+                <td style={{ 
+                  border: '0.7px solid #555', padding: '2px 5px', 
+                  width: '50%', fontSize: 8.5, fontFamily: 'Arial' 
+                }}>
+                  Justification (Describe the business reason for your request)
+                </td>
+                <td style={{ 
+                  border: '0.7px solid #555', padding: '2px 5px', 
+                  width: '50%', fontFamily: 'Arial' 
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 4 }}>
+                    <span style={{ fontSize: 8.5 }}>Technical Comment (To be completed by IT)</span>
+                    <span style={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                      {(['AD','AW','CR','EM','IP','EP'] as const).map(t => (
+                        <CBox key={t} on={r[`tech${t}` as keyof ITRequest] as boolean} label={t} />
+                      ))}
+                    </span>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td style={{ 
+                  border: '0.7px solid #555', padding: '4px 5px', 
+                  width: '50%', 
+                  verticalAlign: 'top', 
+                  height: 55,  
+                  overflow: 'hidden',
+                  fontFamily: 'Arial', fontSize: 9.5, 
+                  whiteSpace: 'pre-line', 
+                  lineHeight: 1.4 
+                }}>
+                  {r.justification}
+                </td>
+                <td style={{ 
+                  border: '0.7px solid #555', padding: '4px 5px', 
+                  width: '50%', verticalAlign: 'top', 
+                  height: 55,
+                  overflow: 'hidden',
+                  fontFamily: 'Arial', fontSize: 9.5, 
+                  whiteSpace: 'pre-line' 
+                }}>
+                  {r.techComment}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          {/* Signatures */}
+          <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '-0.7px', backgroundColor:'#ddebf7' }}>
+            <tbody>
+              <tr>
+                <td colSpan={3} style={{ borderLeft:'1px solid #444',borderRight:'1px solid #444',borderTop:'1px solid #444', padding: '1px 5px', backgroundColor:'ddebf7', fontWeight: 'bold', fontFamily: 'Arial', fontSize: 11, overflow: 'hidden',whiteSpace: 'pre-line' }}>
                   Signature :
                 </td>
               </tr>
@@ -356,21 +487,21 @@ export default async function PrintPage({ params }: { params: Promise<{ id: stri
                 [['Requester / Date', r.sigRequester], ['Sr. Mgr / Date', r.sigSrMgr],  ['IT Admin / Date',  r.sigITAdmin]],
                 [['Spt. Dept. / Date', r.sigSptDept], ['HOO/ Date',      r.sigHOO],     ['MSDI Mgr / Date',  r.sigMSDIMgr]],
               ].map((row, ri) => (
-                <tr key={ri}>
+                <tr style={{borderLeft: '1px solid #444',borderRight: '1px solid #444', }} key={ri}>
                   {row.map(([lbl, val]) => (
-                    <td key={lbl as string} style={{ border: '0.7px solid #555', padding: '3px 6px', width: '33.33%', fontFamily: 'Arial', verticalAlign: 'middle' }}>
+                    <td key={lbl as string} style={{ padding: '3px 6px', width: '33.33%', fontFamily: 'Arial', verticalAlign: 'middle' }}>
                       <div style={{ fontSize: 9.5, marginBottom: 2, color: '#444' }}>{lbl as string}</div>
-                      <div style={{ background: WHITE, minHeight: 22, padding: '3px 4px', fontSize: 11, border: '0.5px solid #bbb', display: 'flex', alignItems: 'center' }}>{val as string}</div>
+                      <div style={{ background: WHITE, minHeight: 20, padding: '3px 4px', fontSize: 11, border: '0.5px solid #bbb', display: 'flex', alignItems: 'center' }}>{val as string}</div>
                     </td>
                   ))}
                 </tr>
               ))}
               <tr>
-                <td style={{ border: '0.7px solid #555', padding: '3px 6px', width: '33.33%', fontFamily: 'Arial', verticalAlign: 'middle' }}>
+                <td style={{ borderLeft: '1px solid #444',borderBottom: '1px solid #444', padding: '3px 6px', width: '33.33%', fontFamily: 'Arial', verticalAlign: 'middle' }}>
                   <div style={{ fontSize: 9.5, marginBottom: 2, color: '#444' }}>Dept. Mgr / Date</div>
                   <div style={{ background: WHITE, minHeight: 22, padding: '3px 4px', fontSize: 11, border: '0.5px solid #bbb', display: 'flex', alignItems: 'center' }}>{r.sigDeptMgr}</div>
                 </td>
-                <td colSpan={2} style={{ border: '0.7px solid #555' }}></td>
+                <td colSpan={2} style={{ borderBottom: '1px solid #555',borderRight: '1px solid #555' }}></td>
               </tr>
             </tbody>
           </table>
@@ -386,4 +517,5 @@ export default async function PrintPage({ params }: { params: Promise<{ id: stri
       `}} /> */}
   </>
   );
+  
 }

@@ -1,15 +1,16 @@
+// app/dashboard/requests/[id]/page.tsx
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Printer, ExternalLink } from 'lucide-react';
-import { prisma } from '@/lib/prisma';
 import { formatDateTime } from '@/lib/utils';
 import { StatusBadge, PriorityBadge } from '@/components/ui/badges';
 import AdminPanel from '@/components/dashboard/AdminPanel';
 import type { ITRequest, RequestStatus, RequestPriority } from '@/types';
+import { requestApi } from '@/lib/api';
 
 export const dynamic = 'force-dynamic';
 
-// ── Helper: checkbox row for form display ──
+// ── Helper components ──
 function CBRow({ on, label }: { on: boolean; label: string }) {
   return (
     <span className="inline-flex items-center gap-1.5 mr-4 mb-1 text-sm">
@@ -53,10 +54,8 @@ function Field({ label, value }: { label: string; value?: string | null }) {
 
 export default async function RequestDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const req = await prisma.request.findUnique({ where: { id } });
-  if (!req) notFound();
-
-  const r = req as unknown as ITRequest;
+  const r = await requestApi.getById(id) as ITRequest | null;
+  if (!r) notFound();
 
   return (
     <div className="flex-1 p-6">
@@ -87,10 +86,9 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        {/* ── LEFT COLUMN: Form Data ── */}
+        {/* ── LEFT COLUMN ── */}
         <div className="lg:col-span-2 space-y-4">
 
-          {/* Requester + Recipient */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <SectionCard title="👤 Requester Information" accent="sky">
               <Field label="Company"        value={r.reqCompany} />
@@ -98,17 +96,16 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
               <Field label="Effective Date" value={r.effectiveDate} />
             </SectionCard>
             <SectionCard title="📦 Recipient Information" accent="sky">
-              <Field label="Company"        value={r.recCompany} />
-              <Field label="Department"     value={r.recDept} />
-              <Field label="Location"       value={r.recLocation} />
-              <Field label="Personnel Name" value={r.recPersonnel} />
+              <Field label="Company"         value={r.recCompany} />
+              <Field label="Department"      value={r.recDept} />
+              <Field label="Location"        value={r.recLocation} />
+              <Field label="Personnel Name"  value={r.recPersonnel} />
               <Field label="Employee ID/NIK" value={r.recEmpId} />
-              <Field label="Title"          value={r.recTitle} />
-              <Field label="Status"         value={r.recStatus} />
+              <Field label="Title"           value={r.recTitle} />
+              <Field label="Status"          value={r.recStatus} />
             </SectionCard>
           </div>
 
-          {/* System & Network */}
           <SectionCard title="🌐 System & Network" accent="green">
             <div className="mb-2">
               <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Action</p>
@@ -127,7 +124,6 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
             {r.snOther && <Field label="Other" value={r.snOther} />}
           </SectionCard>
 
-          {/* Hardware & Software */}
           <SectionCard title="💻 Hardware & Software" accent="amber">
             <div className="mb-2">
               <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Action</p>
@@ -137,17 +133,16 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
             </div>
             <div className="mb-2">
               <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Items</p>
-              <CBRow on={r.hwPC}        label="PC/Desktop" />
-              <CBRow on={r.hwPrinter}   label="Printer" />
-              <CBRow on={r.hwNotebook}  label="Notebook" />
-              <CBRow on={r.hwMSOffice}  label="MS Office Suite" />
-              <CBRow on={r.hwAdobe}     label="Adobe" />
-              <CBRow on={r.hwZoom}      label="Zoom" />
+              <CBRow on={r.hwPC}       label="PC/Desktop" />
+              <CBRow on={r.hwPrinter}  label="Printer" />
+              <CBRow on={r.hwNotebook} label="Notebook" />
+              <CBRow on={r.hwMSOffice} label="MS Office Suite" />
+              <CBRow on={r.hwAdobe}    label="Adobe" />
+              <CBRow on={r.hwZoom}     label="Zoom" />
             </div>
             {r.hwOther && <Field label="Other" value={r.hwOther} />}
           </SectionCard>
 
-          {/* ERP */}
           <SectionCard title="🏭 ERP" accent="purple">
             <div className="mb-2">
               <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Action</p>
@@ -161,15 +156,14 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
               <CBRow on={r.erpSmartMining} label="SMART MINING" />
             </div>
             <div className="grid grid-cols-2 gap-x-4">
-              <Field label="Position ID"      value={r.erpPositionId} />
-              <Field label="*Sign-on ID"      value={r.erpSignOnId} />
-              <Field label="District"         value={r.erpDistrict} />
-              <Field label="*Global Profile"  value={r.erpGlobalProfile} />
+              <Field label="Position ID"     value={r.erpPositionId} />
+              <Field label="*Sign-on ID"     value={r.erpSignOnId} />
+              <Field label="District"        value={r.erpDistrict} />
+              <Field label="*Global Profile" value={r.erpGlobalProfile} />
             </div>
             {r.erpRef && <Field label="Ref. existing Sign On ID/Name" value={r.erpRef} />}
           </SectionCard>
 
-          {/* Desc + Justification */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <SectionCard title="📝 Additional Description" accent="slate">
               <div className="bg-yellow-50 border border-yellow-100 rounded px-3 py-2.5 text-sm text-slate-800 whitespace-pre-line min-h-[80px]">
@@ -189,27 +183,23 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
             </SectionCard>
           </div>
 
-          {/* Signatures */}
           <SectionCard title="✍️ Signatures" accent="slate">
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              <Field label="Requester / Date"   value={r.sigRequester} />
-              <Field label="Sr. Mgr / Date"     value={r.sigSrMgr} />
-              <Field label="IT Admin / Date"    value={r.sigITAdmin} />
-              <Field label="Spt. Dept. / Date"  value={r.sigSptDept} />
-              <Field label="HOO / Date"         value={r.sigHOO} />
-              <Field label="MSDI Mgr / Date"    value={r.sigMSDIMgr} />
-              <Field label="Dept. Mgr / Date"   value={r.sigDeptMgr} />
+              <Field label="Requester / Date"  value={r.sigRequester} />
+              <Field label="Sr. Mgr / Date"    value={r.sigSrMgr} />
+              <Field label="IT Admin / Date"   value={r.sigITAdmin} />
+              <Field label="Spt. Dept. / Date" value={r.sigSptDept} />
+              <Field label="HOO / Date"        value={r.sigHOO} />
+              <Field label="MSDI Mgr / Date"   value={r.sigMSDIMgr} />
+              <Field label="Dept. Mgr / Date"  value={r.sigDeptMgr} />
             </div>
           </SectionCard>
         </div>
 
-        {/* ── RIGHT COLUMN: Admin Panel ── */}
+        {/* ── RIGHT COLUMN ── */}
         <div className="space-y-4">
-          {/* Status + Meta */}
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Informasi</span>
-            </div>
+            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Informasi</span>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between items-center py-1.5 border-b border-slate-50">
                 <span className="text-slate-500">Form No.</span>
@@ -230,7 +220,6 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
             </div>
           </div>
 
-          {/* Admin Panel */}
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
             <h3 className="text-sm font-semibold text-slate-700 mb-4 flex items-center gap-2">
               ⚙️ Admin Panel
@@ -238,7 +227,6 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
             <AdminPanel request={r} />
           </div>
 
-          {/* IT Notes display (read-only) */}
           {r.itNotes && (
             <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
               <p className="text-xs font-semibold text-amber-700 uppercase tracking-wider mb-2">💬 Catatan IT</p>
