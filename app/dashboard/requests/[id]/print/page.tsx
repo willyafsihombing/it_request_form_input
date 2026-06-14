@@ -42,7 +42,7 @@ export default async function PrintPage({ params } : { params: Promise<{ id: str
   const WHITE  = '#ffffff';
 
   //  const cell = (bg = 'white', xtra: React.CSSProperties = {}): React.CSSProperties => ({
-  //   border: '0.7px solid #555',
+  //   border: '0.5px solid #555',
   //   padding: '0 4px',
   //   verticalAlign: 'middle',
   //   textAlign: 'left',
@@ -57,15 +57,15 @@ export default async function PrintPage({ params } : { params: Promise<{ id: str
   // });
 
   const cell = (bg = 'white', xtra: React.CSSProperties = {}): React.CSSProperties => ({
-    border: '0.7px solid #555',
+    border: '0.5px solid #555',
     padding: '0 3px',       
     verticalAlign: 'middle',
     textAlign: 'left',
     fontFamily: 'Arial, sans-serif',
-    fontSize: 11,          
+    fontSize: 10.5,          
     background: bg,
-    height: 16,            
-    lineHeight: '16px',     
+    height: 20.6,            
+    lineHeight: '14px',     
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     ...xtra,
@@ -73,58 +73,26 @@ export default async function PrintPage({ params } : { params: Promise<{ id: str
 
   return (
   <>
-        {/* {r.formNumber} — IT Request Form */}
-        <style>{`
-          // * { box-sizing: border-box; margin: 0; padding: 0; }
-          // @page { size: A4 landscape; margin: 8mm;margin-top: 8mm;margin-bottom: 8mm; }
-          // body { background: white; font-family: Arial, sans-serif; }
-          // @media print {
-          //   body { margin: 0; }
-          //   .no-print { display: none !important; }
-          //   * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-          // }
-
-          /* Hilangkan header & footer browser */
-          // @page {
-          //   margin: 8mm;
-          // }
-          // html {
-          //   -webkit-print-color-adjust: exact;
-          // }
-
-        //   .print-btn {
-        //     position: fixed; top: 12px; right: 12px; z-index: 100;
-        //     display: flex; gap: 8px;
-        //   }
-        //   .print-btn button, .print-btn a {
-        //     padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer;
-        //     font-size: 13px; font-weight: 600; text-decoration: none;
-        //     display: inline-flex; align-items: center; gap: 6px;
-        //   }
-        //   .btn-print  { background: #16a34a; color: white; }
-        //   .btn-close  { background: #64748b; color: white; }
-        // `}</style>
-
-        <style>{`
-          * { box-sizing: border-box; margin: 0; padding: 0; }
-          @page { size: A4 landscape; margin: 4mm; }
-          body { background: white; font-family: Arial, sans-serif; }
-          @media print {
-            body { margin: 0; }
-            .no-print { display: none !important; }
-            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-            #print-area {
-              transform: scale(0.82);
-              transform-origin: top left;
-              width: 122%;
-            }
+      <style>{`
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        @page { size: A4 landscape; margin: 4mm; }
+        body { background: white; font-family: Arial, sans-serif; }
+        @media print {
+          body { margin: 0; }
+          .no-print { display: none !important; }
+          * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+          #print-area {
+            transform: scale(0.82);
+            transform-origin: top left;
+            width: 122%;
           }
-          html { -webkit-print-color-adjust: exact; }
-          .print-btn {
-            position: fixed; top: 12px; right: 12px; z-index: 100;
-            display: flex; gap: 8px;
-          }
-        `}</style>
+        }
+        html { -webkit-print-color-adjust: exact; }
+        .print-btn {
+          position: fixed; top: 12px; right: 12px; z-index: 100;
+          display: flex; gap: 8px;
+        }
+      `}</style>
 
         {/* Print / Close buttons */}
         <div className="print-btn no-print">
@@ -132,7 +100,7 @@ export default async function PrintPage({ params } : { params: Promise<{ id: str
         </div>
 
         {/* ── FORM ── */}
-        <div id='print-area' style={{ padding: '10mm 40mm', maxWidth: '40cm', margin: '0 auto' }}>
+        <div id='print-area' style={{ padding: '8mm 45mm', maxWidth: '45cm', margin: '0 auto' }}>
 
           {/* Title — di luar tabel */}
           <div style={{ position: 'relative', textAlign: 'center', fontFamily: 'Arial', marginBottom: 2 }}>
@@ -238,7 +206,7 @@ export default async function PrintPage({ params } : { params: Promise<{ id: str
               <tr>
                 <td style={cell(YELLOW)}>Company</td>
                 <td colSpan={4} style={cell(YELLOW)}>{ r.reqCompany}</td>
-                  <td colSpan={7} style={cell()}>
+                  <td colSpan={7} style={cell('white', {borderBottom:'none'})}>
                     <div style={{ display: 'flex', gap: 20 }}>
                       <CBox on={r.snLAN}         label="LAN" />
                       <CBox on={r.snVPN}         label="VPN" />
@@ -246,11 +214,13 @@ export default async function PrintPage({ params } : { params: Promise<{ id: str
                       <CBox on={r.snFileSharing} label="File Sharing" />
                     </div>
                   </td>
-                  <td colSpan={8} style={cell()}>
-                    <div style={{ display: 'flex', gap: 50, justifyContent:'center', alignItems:'center' }}>
+                  <td colSpan={8} style={cell('white', {borderBottom:'none'})}>
+                    <div style={{ display: 'flex',gap: 50, alignItems:'center' }}>
                       <CBox on={r.hwPC}       label="PC/Desktop" />
                       <CBox on={r.hwPrinter}  label="Printer" />
+                      <span style={{display: 'flex', marginLeft:'-15px', alignItems:'center'}}>
                       <CBox on={r.hwNotebook} label="Notebook" />
+                      </span>
                     </div>
                   </td>
               </tr>
@@ -259,11 +229,11 @@ export default async function PrintPage({ params } : { params: Promise<{ id: str
               <tr>
                 <td style={cell(YELLOW)}>Personnel Name</td>
                 <td colSpan={4} style={cell(YELLOW)}>{r.reqName}</td>
-                  <td colSpan={7} style={cell()}>
+                  <td colSpan={7} style={cell('white', {borderTop:'none'})}>
                     <CBox on={r.snIntranet} label="Intranet" />
                   </td>
-                  <td colSpan={8} style={cell()}>
-                    <div style={{ display: 'flex', gap: 50, justifyContent:'center', alignItems:'center' }}>
+                  <td colSpan={8} style={cell('white', {borderTop:'none'})}>
+                    <div style={{ display: 'flex', gap: 35, alignItems:'center' }}>
                       <CBox on={r.hwMSOffice} label="MS Office Suite" />
                       <CBox on={r.hwAdobe}    label="Adobe" />
                       <CBox on={r.hwZoom}     label="Zoom" />
@@ -276,8 +246,8 @@ export default async function PrintPage({ params } : { params: Promise<{ id: str
                 <td colSpan={5} style={cell(CYAN, { fontWeight: 'bold', fontSize:'11px' })}>Recipient Information</td>
                 <td colSpan={2} style={cell('white', { border: 'none' })}>Other</td>
                 <td colSpan={5} style={cell()}>{r.snOther}</td>
-                <td colSpan={2} style={cell('white', { border: 'none' })}>Other</td>
-                <td colSpan={6} style={cell()}>{r.hwOther}</td>
+                <td colSpan={3} style={cell('white', { border: 'none' })}>Other</td>
+                <td colSpan={5} style={cell()}>{r.hwOther}</td>
               </tr>
 
               {/* Company(rec) | ERP + PRONTO + SM + actions */}
@@ -285,10 +255,10 @@ export default async function PrintPage({ params } : { params: Promise<{ id: str
                 <td style={cell(YELLOW)}>Company</td>
                 <td colSpan={4} style={cell(YELLOW, { border: 'none', borderBottom: '0.7px solid' })}>{r.recCompany}</td>
                 <td colSpan={2} style={cell(CYAN, { fontWeight: 'bold',  fontSize:'11px' })}>ERP</td>
-                <td colSpan={3} style={cell(CYAN,{border:'none',borderLeft:'0.1px #eee'})}><CBox on={r.erpPronto}      label="PRONTO" /></td>
-                <td colSpan={4} style={cell(CYAN)}><CBox on={r.erpSmartMining} label="SMART MINING" /></td>
-                <td colSpan={6} style={cell(CYAN)}>
-                    <div style={{ display: 'flex', gap: 50 }}>
+                <td colSpan={5} style={cell(CYAN)}><CBox on={r.erpPronto}      label="PRONTO" /></td>
+                <td colSpan={3} style={cell(CYAN)}><CBox on={r.erpSmartMining} label="SMART MINING" /></td>
+                <td colSpan={5} style={cell(CYAN)}>
+                    <div style={{ display: 'flex', gap: 5, justifyContent:'end' }}>
                       <CBox on={r.erpAdd}       label="Add" />
                       <CBox on={r.erpChange}    label="Change" />
                       <CBox on={r.erpTerminate} label="Terminate" />
@@ -299,20 +269,19 @@ export default async function PrintPage({ params } : { params: Promise<{ id: str
               {/* Dept | Position ID | Sign-on ID */}
               <tr>
                 <td style={cell(YELLOW)}>Department</td>
-                <td colSpan={4} style={cell(YELLOW, { border: 'none', borderBottom: '0.7px solid' })}>{r.recDept}</td>
-                <td colSpan={2} style={cell({ fontSize: 10 })}>Position ID</td>
-                <td colSpan={6} style={cell(WHITE)}>{r.erpPositionId}</td>
-                <td colSpan={2} style={cell({ fontSize: 10 })}>*Sign-on ID</td>
+                <td colSpan={4} style={cell(YELLOW, { border: 'none', borderBottom: '0.5px solid' })}>{r.recDept}</td>
+                <td colSpan={2} style={cell()}>Position ID</td>
+                <td colSpan={5} style={cell(WHITE)}>{r.erpPositionId}</td>
+                <td colSpan={3} style={cell()}>*Sign-on ID</td>
                 <td colSpan={5} style={cell(WHITE)}>{r.erpSignOnId}</td>
               </tr>
-
               {/* Location | District | Global Profile */}
               <tr>
                 <td style={cell(YELLOW)}>Location</td>
                 <td colSpan={4} style={cell(YELLOW)}>{r.recLocation}</td>
-                <td colSpan={2} style={cell({ fontSize: 10 })}>District</td>
-                <td colSpan={6} style={cell()}>{r.erpDistrict}</td>
-                <td colSpan={2} style={cell({ fontSize: 10 })}>*Global Profile</td>
+                <td colSpan={2} style={cell()}>District</td>
+                <td colSpan={5} style={cell()}>{r.erpDistrict}</td>
+                <td colSpan={3} style={cell()}>*Global Profile</td>
                 <td colSpan={5} style={cell()}>{r.erpGlobalProfile}</td>
               </tr>
 
@@ -320,54 +289,37 @@ export default async function PrintPage({ params } : { params: Promise<{ id: str
               <tr>
                 <td style={cell(YELLOW)}>Personnel Name</td>
                 <td colSpan={4} style={cell(YELLOW)}>{r.recPersonnel}</td>
-                <td colSpan={3} style={cell('white',{border:'none', fontSize: 9 })}>Ref. existing Sign On ID/Name</td>
-                <td colSpan={12} style={cell('white', { border: 'none', borderRight:'1px solid'})}>{r.erpRef}</td>
+                <td colSpan={3} style={cell('white',{border:'none', fontSize: 9 })}>Ref. existing Sign On ID/Name :</td>
+                <td colSpan={12} style={cell('white', { border: 'none', borderRight:'0.5px solid'})}>{r.erpRef}</td>
               </tr>
 
               {/* EmpID (rowspan) + Title */}
               <tr>
                 <td style={cell(YELLOW)}>Employee ID/NIK</td>
                 <td colSpan={4} style={cell(YELLOW)}>{r.recEmpId}</td>
-                <td colSpan={15} style={cell('white', { border: 'none', borderRight:'1px solid' })}></td>
+                <td colSpan={15} style={cell('white', { border: 'none', borderRight:'0.5px solid' })}></td>
               </tr>
               <tr>
                 <td style={cell(YELLOW)}>Title</td>
                 <td colSpan={4} style={cell(YELLOW)}>{r.recTitle}</td>
-                <td colSpan={15} style={cell('white', { border: 'none', borderRight:'1px solid' })}></td>
+                <td colSpan={15} style={cell('white', { border: 'none', borderRight:'0.5px solid' })}></td>
               </tr>
 
               {/* Status */}
               <tr>
                 <td style={cell(YELLOW)}>Status</td>
                 <td colSpan={4} style={cell(YELLOW)}>{r.recStatus}</td>
-                <td colSpan={15} style={cell('white', { border: 'none', borderRight:'1px solid' })}></td>
+                <td colSpan={15} style={cell('white', { border: 'none', borderRight:'0.5px solid' })}></td>
               </tr>
             </tbody>
           </table>
 
           {/* Additional Desc + Cost Code */}
-          {/* <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '-0.7px' }}>
-            <tbody>
-              <tr>
-                <td style={{ border: '0.7px solid #555', padding: '4px 6px', width: '30%', verticalAlign: 'top', fontFamily: 'Arial', fontSize: 10.5 }}>
-                  <div style={{ fontSize: 9, color: '#444', marginBottom: 4 }}>
-                    Additional Description (Describe the Software / Hardware / Service / Privilege requested)
-                  </div>
-                  <div style={{ minHeight: 70, whiteSpace: 'pre-line', fontSize: 11, lineHeight: 1.55 }}>{r.additionalDesc}</div>
-                </td>
-                <td style={{ border: '0.7px solid #555', padding: '4px 6px', width: '30%', verticalAlign: 'top', fontFamily: 'Arial', fontSize: 10.5 }}>
-                  <div style={{ fontWeight: 'bold', marginBottom: 4 }}>COST CODE / COA :</div>
-                  <div>{r.costCode}</div>
-                </td>
-              </tr>
-            </tbody>
-          </table> */}
-
           <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '-0.7px' }}>
             <tbody>
               <tr>
                 <td style={{ 
-                  border: '0.7px solid #555', padding: '3px 5px', 
+                  border: '0.5px solid #555', padding: '3px 5px', 
                   width: '50%', verticalAlign: 'top', 
                   fontFamily: 'Arial', fontSize: 9.5 
                 }}>
@@ -375,7 +327,7 @@ export default async function PrintPage({ params } : { params: Promise<{ id: str
                     Additional Description (Describe the Software / Hardware / Service / Privilege requested)
                   </div>
                   <div style={{ 
-                    height: 105,            // ← fixed height
+                    height: 120,           
                     overflow: 'hidden',
                     whiteSpace: 'pre-line', 
                     fontSize: 9.5, 
@@ -385,7 +337,7 @@ export default async function PrintPage({ params } : { params: Promise<{ id: str
                   </div>
                 </td>
                 <td style={{ 
-                  border: '0.7px solid #555', padding: '3px 5px', 
+                  border: '0.5px solid #555', padding: '3px 5px', 
                   width: '50%', verticalAlign: 'top', 
                   fontFamily: 'Arial', fontSize: 9.5 
                 }}>
@@ -397,45 +349,17 @@ export default async function PrintPage({ params } : { params: Promise<{ id: str
           </table>
 
           {/* Justification + Technical Comment */}
-          {/* <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '-0.7px' }}>
-            <tbody>
-              <tr>
-                <td style={{ border: '0.7px solid #555', padding: '3px 6px', width: '50%', fontSize: 9.5, fontFamily: 'Arial' }}>
-                  Justification (Describe the business reason for your request)
-                </td>
-                <td style={{ border: '0.7px solid #555', padding: '3px 6px', width: '50%', fontFamily: 'Arial' }}>
-                  <div style={{  display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 4 }}>
-                    <span style={{ fontSize: 9.5 }}>Technical Comment (To be completed by IT)</span>
-                    <span style={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                      {(['AD','AW','CR','EM','IP','EP'] as const).map(t => (
-                        <CBox key={t} on={r[`tech${t}` as keyof ITRequest] as boolean} label={t} />
-                      ))}
-                    </span>
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                <td style={{ border: '0.7px solid #555', padding: '6px 8px', width: '50%', verticalAlign: 'top', height: 80, fontFamily: 'Arial', fontSize: 11, whiteSpace: 'pre-line', lineHeight: 1.5 }}>
-                  {r.justification}
-                </td>
-                <td style={{ border: '0.7px solid #555', padding: '6px 8px', width: '50%', verticalAlign: 'top', height: 80, fontFamily: 'Arial', fontSize: 11, whiteSpace: 'pre-line' }}>
-                  {r.techComment}
-                </td>
-              </tr>
-            </tbody>
-          </table> */}
-
           <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '-0.7px' }}>
             <tbody>
               <tr>
                 <td style={{ 
-                  border: '0.7px solid #555', padding: '2px 5px', 
+                  border: '0.5px solid #555', padding: '2px 5px', 
                   width: '50%', fontSize: 8.5, fontFamily: 'Arial' 
                 }}>
                   Justification (Describe the business reason for your request)
                 </td>
                 <td style={{ 
-                  border: '0.7px solid #555', padding: '2px 5px', 
+                  border: '0.5px solid #555', padding: '2px 5px', 
                   width: '50%', fontFamily: 'Arial' 
                 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 4 }}>
@@ -450,7 +374,7 @@ export default async function PrintPage({ params } : { params: Promise<{ id: str
               </tr>
               <tr>
                 <td style={{ 
-                  border: '0.7px solid #555', padding: '4px 5px', 
+                  border: '0.5px solid #555', padding: '4px 5px', 
                   width: '50%', 
                   verticalAlign: 'top', 
                   height: 55,  
@@ -462,7 +386,7 @@ export default async function PrintPage({ params } : { params: Promise<{ id: str
                   {r.justification}
                 </td>
                 <td style={{ 
-                  border: '0.7px solid #555', padding: '4px 5px', 
+                  border: '0.5px solid #555', padding: '4px 5px', 
                   width: '50%', verticalAlign: 'top', 
                   height: 55,
                   overflow: 'hidden',
@@ -476,32 +400,68 @@ export default async function PrintPage({ params } : { params: Promise<{ id: str
           </table>
 
           {/* Signatures */}
-          <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '-0.7px', backgroundColor:'#ddebf7' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '-0.7px', backgroundColor:'#e4f2ff' }}>
             <tbody>
+              {/* Header */}
               <tr>
-                <td colSpan={3} style={{ borderLeft:'1px solid #444',borderRight:'1px solid #444',borderTop:'1px solid #444', padding: '1px 5px', backgroundColor:'ddebf7', fontWeight: 'bold', fontFamily: 'Arial', fontSize: 11, overflow: 'hidden',whiteSpace: 'pre-line' }}>
+                <td colSpan={6} style={{ border: '0.5px solid #555', padding: '2px 8px', background: CYAN, fontWeight: 'bold', fontFamily: 'Arial', fontSize: 11 }}>
                   Signature :
                 </td>
               </tr>
-              {[
-                [['Requester / Date', r.sigRequester], ['Sr. Mgr / Date', r.sigSrMgr],  ['IT Admin / Date',  r.sigITAdmin]],
-                [['Spt. Dept. / Date', r.sigSptDept], ['HOO/ Date',      r.sigHOO],     ['MSDI Mgr / Date',  r.sigMSDIMgr]],
-              ].map((row, ri) => (
-                <tr style={{borderLeft: '1px solid #444',borderRight: '1px solid #444', }} key={ri}>
-                  {row.map(([lbl, val]) => (
-                    <td key={lbl as string} style={{ padding: '3px 6px', width: '33.33%', fontFamily: 'Arial', verticalAlign: 'middle' }}>
-                      <div style={{ fontSize: 9.5, marginBottom: 2, color: '#444' }}>{lbl as string}</div>
-                      <div style={{ background: WHITE, minHeight: 20, padding: '3px 4px', fontSize: 11, border: '0.5px solid #bbb', display: 'flex', alignItems: 'center' }}>{val as string}</div>
-                    </td>
-                  ))}
-                </tr>
-              ))}
+
+              {/* Row 1 — Requester | Sr. Mgr | IT Admin */}
               <tr>
-                <td style={{ borderLeft: '1px solid #444',borderBottom: '1px solid #444', padding: '3px 6px', width: '33.33%', fontFamily: 'Arial', verticalAlign: 'middle' }}>
-                  <div style={{ fontSize: 9.5, marginBottom: 2, color: '#444' }}>Dept. Mgr / Date</div>
-                  <div style={{ background: WHITE, minHeight: 22, padding: '3px 4px', fontSize: 11, border: '0.5px solid #bbb', display: 'flex', alignItems: 'center' }}>{r.sigDeptMgr}</div>
+                <td style={{borderRight: '0.5px solid #555', borderLeft:'0.5px solid #555', padding: '6px 6px', width: '10%', fontFamily: 'Arial', fontSize: 9, whiteSpace: 'nowrap', height: 30 }}>
+                  Requester / Date
                 </td>
-                <td colSpan={2} style={{ borderBottom: '1px solid #555',borderRight: '1px solid #555' }}></td>
+                <td style={{ border: '0.5px solid #555', padding: '6px 6px', width: '25%', fontFamily: 'Arial', fontSize: 10, height: 30 }}>
+                  {r.sigRequester}
+                </td>
+                <td style={{ borderRight: '0.5px solid #555', borderLeft:'0.5px solid #555', padding: '6px 10px', width: '8%', fontFamily: 'Arial', fontSize: 9, whiteSpace: 'nowrap', height: 30 }}>
+                  Sr. Mgr / Date
+                </td>
+                <td style={{ border: '0.5px solid #555', padding: '6px 6px', width: '25%', fontFamily: 'Arial', fontSize: 10, height: 30 }}>
+                  {r.sigSrMgr}
+                </td>
+                <td style={{ borderRight: '0.5px solid #555', borderLeft:'0.5px solid #555', padding: '6px 10px', width: '8%', fontFamily: 'Arial', fontSize: 9, whiteSpace: 'nowrap', height: 30 }}>
+                  IT Admin / Date
+                </td>
+                <td style={{ border: '0.5px solid #555', padding: '6px 6px', width: '25%', fontFamily: 'Arial', fontSize: 10, height: 30 }}>
+                  {r.sigITAdmin}
+                </td>
+              </tr>
+
+              {/* Row 2 — Spt. Dept | HOO | MSDI Mgr */}
+              <tr>
+                <td style={{ borderRight: '0.5px solid #555', borderLeft:'0.5px solid #555', padding: '6px 6px', width: '10%', fontFamily: 'Arial', fontSize: 9, whiteSpace: 'nowrap', height: 30 }}>
+                  Spt. Dept. / Date
+                </td>
+                <td style={{ border: '0.5px solid #555', padding: '6px 6px', width: '25%', fontFamily: 'Arial', fontSize: 10, height: 30 }}>
+                  {r.sigSptDept}
+                </td>
+                <td style={{ borderRight: '0.5px solid #555', borderLeft:'0.5px solid #555', padding: '6px 10px', width: '8%', fontFamily: 'Arial', fontSize: 9, whiteSpace: 'nowrap', height: 30 }}>
+                  HOO/ Date
+                </td>
+                <td style={{ border: '0.5px solid #555', padding: '6px 6px', width: '25%', fontFamily: 'Arial', fontSize: 10, height: 30 }}>
+                  {r.sigHOO}
+                </td>
+                <td style={{ borderRight: '0.5px solid #555', borderLeft:'0.5px solid #555', padding: '6px 10px', width: '8%', fontFamily: 'Arial', fontSize: 9, whiteSpace: 'nowrap', height: 30 }}>
+                  MSDI Mgr / Date
+                </td>
+                <td style={{ border: '0.5px solid #555', padding: '6px 6px', width: '25%', fontFamily: 'Arial', fontSize: 10, height: 30 }}>
+                  {r.sigMSDIMgr}
+                </td>
+              </tr>
+
+              {/* Row 3 — Dept. Mgr */}
+              <tr>
+                <td style={{ borderRight: '0.5px solid #555', borderLeft:'0.5px solid #555', borderBottom:'0.5px solid #555', padding: '3px 6px', width: '8%', fontFamily: 'Arial', fontSize: 9, whiteSpace: 'nowrap', height: 30 }}>
+                  Dept. Mgr / Date
+                </td>
+                <td style={{ border: '0.5px solid #555', padding: '3px 6px', width: '25%', fontFamily: 'Arial', fontSize: 10, height: 30 }}>
+                  {r.sigDeptMgr}
+                </td>
+                <td colSpan={4} style={{ borderRight: '0.5px solid #555', borderLeft:'0.5px solid #555',borderBottom:'0.5px solid #555' }}></td>
               </tr>
             </tbody>
           </table>

@@ -26,6 +26,16 @@ async function request<T>(
     cache: 'no-store',
   });
 
+  if (res.status === 401) {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('auth-token')
+      localStorage.removeItem('auth-user')
+      document.cookie = 'auth-token=; path=/; max-age=0';
+      window.location.href='/login';
+    }
+    throw new Error('Session Expired')
+  }
+
   if (!res.ok) {
     const err = await res.json().catch(() => ({ error: 'Unknown error' }));
     throw new Error(err.error || `HTTP ${res.status}`);
@@ -69,6 +79,7 @@ export const requestApi = {
     search?: string;
     page?: number;
     limit?: number;
+    reqName?: string;
   }) => {
     const query = new URLSearchParams();
     if (params?.status)   query.set('status',   params.status);
@@ -76,6 +87,7 @@ export const requestApi = {
     if (params?.search)   query.set('search',   params.search);
     if (params?.page)     query.set('page',     String(params.page));
     if (params?.limit)    query.set('limit',    String(params.limit));
+    if (params?.reqName)  query.set('reqName',  params.reqName);
     return request(`/api/requests?${query.toString()}`);
   },
 
@@ -100,5 +112,9 @@ export const requestApi = {
 
 // ── Stats ──────────────────────────────────────────
 export const statsApi = {
-  get: () => request('/api/stats'),
+  getStats: (reqName?: string) => {
+    const query = new URLSearchParams();
+    if(reqName) query.set('reqName', reqName);
+    return request(`/api/stats?${query.toString()}`);
+  } 
 };

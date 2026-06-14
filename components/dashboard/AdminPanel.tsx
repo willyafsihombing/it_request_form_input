@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Save, Loader2, UserCheck, MessageSquare, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { StatusBadge, PriorityBadge } from '@/components/ui/badges';
 import type { RequestStatus, RequestPriority, ITRequest } from '@/types';
+import { requestApi } from '@/lib/api';
 
 const STATUS_OPTIONS: { value: RequestStatus; label: string }[] = [
   { value: 'pending',   label: 'Pending'   },
@@ -21,6 +22,7 @@ const PRIORITY_OPTIONS: { value: RequestPriority; label: string }[] = [
   { value: 'urgent', label: 'Urgent' },
 ];
 
+
 export default function AdminPanel({ request }: { request: ITRequest }) {
   const router = useRouter();
   const [status,     setStatus]     = useState<RequestStatus>(request.status);
@@ -29,30 +31,39 @@ export default function AdminPanel({ request }: { request: ITRequest }) {
   const [itNotes,    setItNotes]    = useState(request.itNotes    || '');
   const [saving,     setSaving]     = useState(false);
   const [saved,      setSaved]      = useState(false);
+  const [userRole,   setUserRole]   = useState<string>('')
+
+
+  useEffect(() => {
+  const useStr = localStorage.getItem('auth-user');
+  if (useStr) {
+    try{
+      const user = JSON.parse(useStr);
+      setUserRole(user.role || '');
+    }catch{
+      setUserRole('')
+    }
+  }
+  // console.log(useStr)
+}, []);
+
+  const isITStaff = userRole === 'staff' || userRole === 'itstaff';
+  const isAdmin = userRole === 'admin';
+  const canEdit = isITStaff;
 
   const handleSave = async () => {
+  if (!canEdit) return;
   setSaving(true);
   try {
-    const res = await fetch(`/api/requests/${request.id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status, priority, assignedTo, itNotes }),
-    });
+      await requestApi.update(request.id,{status, priority,assignedTo,itNotes});
 
-    if (!res.ok) {
-      const err = await res.json();
-      alert(err.error || 'Gagal menyimpan');
-      return;
-    }
-
-    setSaved(true);
-    setTimeout(() => {
-      setSaved(false);
-      window.location.reload(); // ← paksa fetch ulang dari DB
-    }, 1000);
-
+      setSaved(true)
+      setTimeout(() => {
+        setSaved(false);
+        window.location.reload()
+      }, 1000);
   } catch {
-    alert('Gagal menghubungi server');
+    alert('Gagal menyimpan data');
   } finally {
     setSaving(false);
   }
@@ -66,6 +77,17 @@ export default function AdminPanel({ request }: { request: ITRequest }) {
         <PriorityBadge priority={priority} />
       </div>
 
+      {/* {userRole && (
+        <div className={cn(
+          'px-3 py-1.5 rounded-lg text-xs font-semibold',
+          canEdit
+            ? 'bg-green-50 text-green-700 border border-green-200'
+            : 'bg-amber-50 text-amber-700 border border-amber-200'
+        )}>
+          {canEdit ? '✅ IT Staff — dapat mengedit' : '👁️ Admin — hanya dapat melihat'}
+        </div>
+      )} */}
+
       {/* Status */}
       <div>
         <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
@@ -75,9 +97,11 @@ export default function AdminPanel({ request }: { request: ITRequest }) {
           {STATUS_OPTIONS.map(opt => (
             <button
               key={opt.value}
-              onClick={() => setStatus(opt.value)}
+              onClick={() => canEdit && setStatus(opt.value)}
+              disabled={!canEdit}
               className={cn(
                 'px-3 py-2 rounded-lg text-xs font-semibold border transition-all',
+                !canEdit && 'cursor-not-allowed opacity-60',
                 status === opt.value
                   ? 'border-sky-400 bg-sky-50 text-sky-700 shadow-sm'
                   : 'border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50'
@@ -98,9 +122,11 @@ export default function AdminPanel({ request }: { request: ITRequest }) {
           {PRIORITY_OPTIONS.map(opt => (
             <button
               key={opt.value}
-              onClick={() => setPriority(opt.value)}
+              onClick={() => canEdit && setPriority(opt.value)}
+              disabled={!canEdit}
               className={cn(
                 'px-3 py-2 rounded-lg text-xs font-semibold border transition-all',
+                !canEdit && 'cursor-not-allowed opacity-60',
                 priority === opt.value
                   ? 'border-sky-400 bg-sky-50 text-sky-700 shadow-sm'
                   : 'border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50'
@@ -127,7 +153,8 @@ export default function AdminPanel({ request }: { request: ITRequest }) {
         </div> */}
 
       {/* IT Notes */}
-      {/* <div>
+      {canEdit && (
+      <div>
         <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
           <MessageSquare size={11} className="inline mr-1" />Catatan IT
         </label>
@@ -138,27 +165,30 @@ export default function AdminPanel({ request }: { request: ITRequest }) {
           rows={4}
           className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-400 bg-white resize-none"
         />
-      </div> */}
+      </div>
+      )}
 
       {/* Save */}
-      <button
-        onClick={handleSave}
-        disabled={saving}
-        className={cn(
-          'w-full py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all',
-          saved
-            ? 'bg-green-500 text-white'
-            : 'bg-sky-600 hover:bg-sky-700 text-white shadow-sm hover:shadow-md'
+      {canEdit && (
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          className={cn(
+            'w-full py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all',
+            saved
+              ? 'bg-green-500 text-white'
+              : 'bg-sky-600 hover:bg-sky-700 text-white shadow-sm hover:shadow-md'
+          )}
+        >
+          {saving ? (
+            <><Loader2 size={15} className="animate-spin" /> Menyimpan...</>
+          ) : saved ? (
+            <>✓ Tersimpan</>
+          ) : (
+            <><Save size={15} /> Simpan Perubahan</>
+          )}
+        </button>
         )}
-      >
-        {saving ? (
-          <><Loader2 size={15} className="animate-spin" /> Menyimpan...</>
-        ) : saved ? (
-          <>✓ Tersimpan</>
-        ) : (
-          <><Save size={15} /> Simpan Perubahan</>
-        )}
-      </button>
     </div>
   );
 }

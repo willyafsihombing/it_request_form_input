@@ -7,7 +7,6 @@ import { cn } from '@/lib/utils';
 import { requestApi } from '@/lib/api'; 
 
 
-
 const INIT = {
   formNumber: '',
   effectiveDate: new Date().toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' }),
@@ -94,8 +93,18 @@ export default function ITRequestForm() {
   const u = (k: keyof FormData, v: unknown) => setData(p => ({ ...p, [k]: v }));
   const tog = (k: keyof FormData) => setData(p => ({ ...p, [k]: !p[k as keyof typeof p] }));
 
+  const inpRequired = (value: string) => 
+  `${inp} ${!value.trim() ? 'border-red-300 bg-red-50' : ''}`;
+
  const handleSubmit = async () => {
+
+  if (!data.recEmpId.trim()) { setError('Employee ID wajib diisi'); return;}
+  if (!data.recPersonnel.trim()) { setError('Personal Name wajib diisi'); return;}
+  if (!data.recTitle.trim()) { setError('Jabatan wajib diisi'); return;}
+  if (!data.justification.trim()) { setError('Justifikasi pembelian wajib diisi'); return;}
+  if (!data.additionalDesc.trim()) { setError('Pembelian barang dengan qty dicantumkan diawal wajib diisi'); return;}
   if (!data.reqName.trim()) { setError('Nama requester wajib diisi'); return; }
+
   setError('');
   setSubmitting(true);
   try {

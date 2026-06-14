@@ -12,65 +12,6 @@ export default function PrintButtons() {
     window.print();
   };
 
-  // menjadi printPDF
-//   const handleDownloadPDF = async () => {
-//   setDownloading(true);
-//   try {
-//     const element = document.querySelector('#print-area') as HTMLElement;
-//     if (!element) { alert('Konten form tidak ditemukan'); return; }
-
-//     const formNumberEl = document.querySelector('[data-form-number]');
-//     const formNumber = formNumberEl?.getAttribute('data-form-number') || 'IT-Request';
-
-//     const html2canvas = (await import('html2canvas')).default;
-//     const { jsPDF }   = await import('jspdf');
-
-//     const canvas = await html2canvas(element, {
-//       scale: 2,
-//       useCORS: true,
-//       scrollX: 0,
-//       scrollY: -window.scrollY,
-//       windowWidth: document.documentElement.scrollWidth, // ← lebar actual halaman
-//       width: element.offsetWidth,
-//       height: element.scrollHeight,
-//     });
-
-//     const imgData = canvas.toDataURL('image/jpeg', 1.0);
-
-//     // A4 landscape: 297 x 210 mm
-//     const pdf = new jsPDF({
-//       orientation: 'landscape',
-//       unit: 'mm',
-//       format: 'a4',
-//     });
-
-//     // Paksa gambar fill penuh A4 — margin 5mm semua sisi
-//     const margin  = 5;
-//     const pdfW    = 297 - margin * 2; // 287mm
-//     const pdfH    = 210 - margin * 2; // 200mm
-
-//     // Hitung tinggi proporsional
-//     const canvasRatio = canvas.height / canvas.width;
-//     const imgH = pdfW * canvasRatio;
-
-//     // Kalau tinggi melebihi halaman, scale dari tinggi
-//     if (imgH > pdfH) {
-//       const scaledW = pdfH / canvasRatio;
-//       pdf.addImage(imgData, 'JPEG', margin + (pdfW - scaledW) / 2, margin, scaledW, pdfH);
-//     } else {
-//       pdf.addImage(imgData, 'JPEG', margin, margin, pdfW, imgH);
-//     }
-
-//     pdf.save(`${formNumber}.pdf`);
-
-//   } catch (err) {
-//     console.error('PDF error:', err);
-//     alert('Gagal membuat PDF');
-//   } finally {
-//     setDownloading(false);
-//   }
-// };
-
 const handleDownloadPDF = async () => {
   setDownloading(true);
   try {
@@ -100,13 +41,27 @@ const handleDownloadPDF = async () => {
         <head>
           <meta charset="UTF-8">
           ${styles}
-          <style>
-            @page { size: A4 landscape; margin: 5mm; }
-            * { box-sizing: border-box; margin: 0; padding: 0; }
-            body { background: white; font-family: Arial, sans-serif; }
+        <style>
+          * { box-sizing: border-box; margin: 0; padding: 0; }
+          @page { size: A4 landscape; margin: 4mm; }
+          body { background: white; font-family: Arial, sans-serif; }
+          @media print {
+            body { margin: 0; }
+            .no-print { display: none !important; }
             * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-        }
-          </style>
+
+            #print-area {
+              transform: scale(0.90);
+              transform-origin: top left;
+              width: 115%;                
+            }
+          }
+          html { -webkit-print-color-adjust: exact; }
+          .print-btn {
+            position: fixed; top: 12px; right: 12px; z-index: 100;
+            display: flex; gap: 8px;
+          }
+        </style>
         </head>
         <body>
           ${printArea.outerHTML}

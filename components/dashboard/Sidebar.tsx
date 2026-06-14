@@ -5,9 +5,11 @@ import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard, ClipboardList, FilePlus2, Settings,
   Monitor, Building2, ChevronRight,
+  UserCircle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import LogoutButton from '@/components/layout/logoutButton';
+import { useEffect, useState } from 'react';
 
 const NAV_ITEMS = [
   { href: '/dashboard',          label: 'Dashboard',       icon: LayoutDashboard },
@@ -17,11 +19,33 @@ const NAV_ITEMS = [
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const [currentUser, setCurrentUser] = useState<{
+    fullName: string;
+    role: string;
+    department:string;
+  } | null>(null)
+
+  useEffect(() => {
+    const useStr = localStorage.getItem('auth-user');
+    if(useStr) {
+      try{
+        setCurrentUser(JSON.parse(useStr))
+      }catch{
+        setCurrentUser(null)
+      }
+    }
+  }, [])
 
   const isActive = (href: string) =>
     href === '/dashboard'
       ? pathname === '/dashboard'
       : pathname.startsWith(href);
+
+  const roleLabel: Record<string, string> = {
+    admin:    'Administrator',
+    itstaff:  'IT Staff',
+    staff:    'Staff',
+  };
 
   return (
     <aside className="fixed inset-y-0 left-0 z-50 w-64 bg-slate-900 flex flex-col">
@@ -29,9 +53,9 @@ export default function Sidebar() {
       <div className="px-5 py-5 border-b border-slate-700/60">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-sky-500 flex items-center justify-center flex-shrink-0">
-            <Monitor size={18} className="text-white" />
+            <Monitor size={18} className="text-white" />            
           </div>
-          <div>
+        <div>
             <p className="text-white font-bold text-sm leading-tight">IT Request</p>
             <p className="text-slate-400 text-xs">Resource Group</p>
           </div>
@@ -41,10 +65,37 @@ export default function Sidebar() {
       {/* Company Badge */}
       <div className="mx-4 my-3 px-3 py-2 bg-slate-800/60 rounded-lg border border-slate-700/50">
         <div className="flex items-center gap-2">
-          <Building2 size={13} className="text-sky-400 flex-shrink-0" />
-          <span className="text-slate-300 text-xs font-medium leading-tight">PT. Unggul Dinamika Utama</span>
+          <div className="w-9 h-9 rounded-xl bg-sky-100 flex items-center justify-center flex-shrink-0">
+            <img
+              src="/img/logo.png"
+              alt='logo-unggul'
+              width={2}
+              height={2}
+              className='w-full h-full object-contain'
+            />
+          </div>          
+            <span className="text-slate-300 text-xs font-medium leading-tight">PT. Unggul Dinamika Utama</span>
         </div>
       </div>
+
+      {currentUser && (
+        <div className="mx-4 mb-3 px-3 py-2.5 bg-sky-500/10 rounded-lg border border-sky-500/20">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-full bg-sky-500/20 flex items-center justify-center flex-shrink-0">
+              <UserCircle size={18} className="text-sky-400" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-white text-xs font-semibold truncate">
+                {currentUser.fullName}
+              </p>
+              <p className="text-sky-400 text-xs truncate">
+                Department
+                {currentUser.department ? ` ${currentUser.department}` : ''}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Navigation */}
       <nav className="flex-1 px-3 py-2 space-y-1 overflow-y-auto scrollbar-thin">
@@ -71,6 +122,7 @@ export default function Sidebar() {
         })}
       </nav>
       <div className="mt-auto p-4 border-t border-slate-100">
+            <span></span>
             <LogoutButton />
       </div>
 

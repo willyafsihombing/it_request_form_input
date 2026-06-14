@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, use } from 'react';
 import Link from 'next/link';
 import { Search, Filter, ChevronLeft, ChevronRight, Eye, Printer, Trash2, RefreshCw, X } from 'lucide-react';
 import { cn, formatDate, timeAgo } from '@/lib/utils';
@@ -38,13 +38,58 @@ export default function RequestsTable() {
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; formNumber: string } | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false)
   const [successMessage, setSuccessMessage] = useState('')
+  const [currentUser, setCurrentUser] = useState <{ role: string, fullName:string} | null>(null);
+  const [userLoaded, setUserLoaded] = useState(false)
   
+    useEffect(() => {
+      const useStr = localStorage.getItem('auth-user')
+      if(useStr){
+        try{
+          const user = JSON.parse(useStr);
+          setCurrentUser(user)
+        }catch {
+          setCurrentUser(null)
+        }
+      }
+      setUserLoaded(true)
+    },[]);
+
+  const isAdminOrIT = currentUser?.role === 'admin' || currentUser?.role === 'itstaff' || currentUser?.role === 'staff'
+
+  const fetchRequests = useCallback(async () => {
+    if (!userLoaded) return;
+
+    setLoading(true);
+    try {
+    const data = await requestApi.getAll({
+      page,
+      limit: 15,
+      status: status !== 'all' ? status : undefined,
+      priority:priority !== 'all' ? priority : undefined,
+      search: search || undefined,
+      reqName: !isAdminOrIT && currentUser?.fullName ? currentUser.fullName : undefined,
+    }) as any;
+      
+      setRequests(data.requests ?? []);
+      setTotal(data.total ?? 0);
+      setPages(data.pages ?? 1)
+    }catch (err){
+      console.log('fetch requests error', err)
+      setRequests([])
+    } finally {
+      setLoading (false)
+    }
+  }, [page, status, priority, search, currentUser, isAdminOrIT, userLoaded]);
+
+  useEffect(() => { fetchRequests(); }, [fetchRequests]);
+  useEffect(() => { setPage(1); }, [search, status, priority]);
+    
   const handleDeleteClick = (id: string, formNumber: string) => {
   setDeleteTarget({ id, formNumber });
   setShowModal(true);
 };
 
-  const handleDeleteConfirm = async () => {
+ const handleDeleteConfirm = async () => {
     if (!deleteTarget) return;
     setLoading(true);
     try {
@@ -61,34 +106,6 @@ export default function RequestsTable() {
       setDeleteLoading(false);
     }
   };
-
-  const fetchRequests = useCallback(async () => {
-    setLoading(true);
-    try {
-    const data = await requestApi.getAll({
-      page,
-      limit: 15,
-      status: status !== 'all' ? status : undefined,
-      priority:priority !== 'all' ? priority : undefined,
-      search: search || undefined,
-    }) as any;
-
-      console.log('API response:', data);
-      console.log('First request:', data.requests?.[0]);
-      
-      setRequests(data.requests ?? []);
-      setTotal(data.total ?? 0);
-      setPages(data.pages ?? 1)
-    }catch (err){
-      console.log('fetch requests error', err)
-      setRequests([])
-    } finally {
-      setLoading (false)
-    }
-  }, [page, status, priority, search]);
-
-  useEffect(() => { fetchRequests(); }, [fetchRequests]);
-  useEffect(() => { setPage(1); }, [search, status, priority]);
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
