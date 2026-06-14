@@ -3,8 +3,6 @@ import Link from 'next/link';
 import { FilePlus2 } from 'lucide-react';
 import RequestsTable from '@/components/dashboard/RequestsTable';
 
-export const dynamic = 'force-dynamic';
-
 export default function RequestsPage() {
   return (
     <div className="flex-1 p-6 space-y-5">
