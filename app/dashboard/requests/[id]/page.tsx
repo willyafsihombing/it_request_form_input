@@ -10,7 +10,6 @@ import { requestApi } from '@/lib/api';
 
 export const dynamic = 'force-dynamic';
 
-// ── Helper components ──
 function CBRow({ on, label }: { on: boolean; label: string }) {
   return (
     <span className="inline-flex items-center gap-1.5 mr-4 mb-1 text-sm">
@@ -86,7 +85,6 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        {/* ── LEFT COLUMN ── */}
         <div className="lg:col-span-2 space-y-4">
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -196,7 +194,6 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
           </SectionCard>
         </div>
 
-        {/* ── RIGHT COLUMN ── */}
         <div className="space-y-4">
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 space-y-3">
             <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Informasi</span>

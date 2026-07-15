@@ -9,6 +9,7 @@ import { requestApi } from '@/lib/api';
 
 const INIT = {
   formNumber: '',
+  requestTitle : '',
   effectiveDate: new Date().toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' }),
   reqCompany: 'PT. UNGGUL DINAMIKA UTAMA',
   reqName: '',
@@ -82,7 +83,7 @@ export default function ITRequestForm() {
           reqName: user.fullName || p.reqName,
           sigRequester: user.fullName || p.reqName
         }))
-      }catch {
+      }catch {  
         // 
       }
       console.log(useStr)
@@ -97,7 +98,8 @@ export default function ITRequestForm() {
   `${inp} ${!value.trim() ? 'border-red-300 bg-red-50' : ''}`;
 
  const handleSubmit = async () => {
-
+  
+  if (!data.requestTitle.trim()) {setError('Judul request wajib diisi');return;}
   if (!data.recEmpId.trim()) { setError('Employee ID wajib diisi'); return;}
   if (!data.recPersonnel.trim()) { setError('Personal Name wajib diisi'); return;}
   if (!data.recTitle.trim()) { setError('Jabatan wajib diisi'); return;}
@@ -108,7 +110,6 @@ export default function ITRequestForm() {
   setError('');
   setSubmitting(true);
   try {
-    // Destructure formNumber agar tidak terkirim
     const { formNumber, ...submitData } = data;
     const created = await requestApi.create(submitData) as any;
     router.push(`/form/success?id=${created.id}&form=${created.formNumber}`);
@@ -143,6 +144,17 @@ export default function ITRequestForm() {
       )}
       <div className="text-center items-center justify-center text-black bg-slate-50 text-xl font-medium text-slate">Information Technology Request Form</div>
       <Sec icon="📋" title="Informasi Form" bg="bg-slate-100" />
+
+      <Row label="Title Request" required>
+         <input 
+            value={data.requestTitle}
+            onChange={e => u('requestTitle', e.target.value)}
+            maxLength={50}
+            className={inpRequired(data.requestTitle)}
+            placeholder="Contoh : Permintaan laptop baru"
+         />
+      </Row>
+
       <div className={grid2}>
         <Row label="Effective Date">
           <input value={data.effectiveDate} disabled className={inp + ' cursor-not-allowed opacity-60'} />
@@ -158,7 +170,6 @@ export default function ITRequestForm() {
         </Row>
       </div>
 
-      {/* Requester */}
       <Sec icon="👤" title="Requester Information" bg="bg-sky-50" color="text-sky-800" />
       <Row label="Company" required>
         <input value={data.reqCompany} disabled className={inp + ' cursor-not-allowed opacity-60'} />
@@ -167,19 +178,17 @@ export default function ITRequestForm() {
         <input value={data.reqName} onChange={e => u('reqName', e.target.value)} disabled className={inp} />
       </Row>
 
-      {/* Recipient */}
       <Sec icon="📦" title="Recipient Information" bg="bg-sky-50" color="text-sky-800" />
       <div className={grid2}>
         <Row label="Company"><input value={data.recCompany} disabled className={inp + ' cursor-not-allowed opacity-60'} /></Row>
         <Row label="Department"><input value={data.recDept} disabled onChange={e => u('recDept', e.target.value)} className={inp} /></Row>
         <Row label="Location"><input value={data.recLocation} disabled className={inp + ' cursor-not-allowed opacity-60'} /></Row>
         <Row label="Personnel Name"><input value={data.recPersonnel} onChange={e => u('recPersonnel', e.target.value.toUpperCase())} className={inp} /></Row>
-        <Row label="Employee ID/NIK"><input value={data.recEmpId} onChange={e => u('recEmpId', e.target.value)} className={inp} /></Row>
+        <Row label="Employee ID/NIK"><input value={data.recEmpId} onChange={e => u('recEmpId', e.target.value.replace(/[^0-9]/g, ''))} className={inp} /></Row>
         <Row label="Title"><input value={data.recTitle} onChange={e => u('recTitle', e.target.value.toUpperCase())} className={inp} /></Row>
         <Row label="Status"><input value={data.recStatus} disabled className={inp + ' cursor-not-allowed opacity-60'} /></Row>
       </div>
 
-      {/* System & Network */}
       <Sec icon="🌐" title="System & Network" bg="bg-green-50" color="text-green-800" />
       <Row label="Action">
         <CB label="Add" checked={data.snAdd} onChange={() => tog('snAdd')} />
@@ -195,7 +204,6 @@ export default function ITRequestForm() {
       </Row>
       <Row label="Other"><input value={data.snOther} onChange={e => u('snOther', e.target.value)} className={inp} /></Row>
 
-      {/* Hardware & Software */}
       <Sec icon="💻" title="Hardware & Software" bg="bg-amber-50" color="text-amber-800" />
       <Row label="Action">
         <CB label="Add" checked={data.hwAdd} onChange={() => tog('hwAdd')} />
@@ -212,7 +220,6 @@ export default function ITRequestForm() {
       </Row>
       <Row label="Other"><input value={data.hwOther} onChange={e => u('hwOther', e.target.value)} className={inp} /></Row>
 
-      {/* ERP */}
       <Sec icon="🏭" title="ERP" bg="bg-purple-50" color="text-purple-800" />
       <Row label="Action">
         <CB label="Add" checked={data.erpAdd} onChange={() => tog('erpAdd')} />
@@ -233,9 +240,12 @@ export default function ITRequestForm() {
         <input value={data.erpRef} onChange={e => u('erpRef', e.target.value)} className={inp} />
       </Row>
 
-      {/* Additional Description */}
       <Sec icon="📝" title="Additional Description" bg="bg-slate-100" />
-      <textarea value={data.additionalDesc} onChange={e => u('additionalDesc', e.target.value)}
+      <textarea value={data.additionalDesc} onChange={e => { 
+        const lines = e.target.value.split('\n')
+        const limited = lines.length > 9 ? lines.slice(0, 9).join('\n') : e.target.value 
+        u('additionalDesc', limited)
+      }} 
         rows={6} className={ta}
         placeholder="Describe the Software / Hardware / Service / Privilege requested..." />
       <div className="mt-3">
@@ -244,13 +254,11 @@ export default function ITRequestForm() {
         </Row>
       </div>
 
-      {/* Justification */}
       <Sec icon="✅" title="Justification" bg="bg-green-50" color="text-green-800" />
       <textarea value={data.justification} onChange={e => u('justification', e.target.value)}
         rows={3} className={ta}
         placeholder="Describe the business reason for your request..." />
 
-      {/* Signatures */}
       <Sec icon="✍️" title="Signatures" bg="bg-slate-100" />
       <div className={grid2}>
         <Row label="Requester / Date"><input value={data.sigRequester} onChange={e => u('sigRequester', e.target.value)} disabled className={inp + ' cursor-not-allowed opacity-60' } /></Row>
@@ -262,7 +270,6 @@ export default function ITRequestForm() {
         <Row label="MSDI Mgr / Date"><input value={data.sigMSDIMgr} disabled className={inp + ' cursor-not-allowed opacity-60'} /></Row>
       </div>
 
-      {/* Submit */}
       <div className="mt-8 pb-8">
         <button
           onClick={handleSubmit}

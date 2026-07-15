@@ -1,4 +1,3 @@
-// app/dashboard/requests/page.tsx
 import Link from 'next/link';
 import { FilePlus2 } from 'lucide-react';
 import RequestsTable from '@/components/dashboard/RequestsTable';
@@ -6,7 +5,6 @@ import RequestsTable from '@/components/dashboard/RequestsTable';
 export default function RequestsPage() {
   return (
     <div className="flex-1 p-6 space-y-5">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-800">Semua IT Request</h1>
@@ -21,7 +19,6 @@ export default function RequestsPage() {
         </Link>
       </div>
 
-      {/* Table with built-in search/filter */}
       <RequestsTable />
     </div>
   );

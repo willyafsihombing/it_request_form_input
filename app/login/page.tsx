@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Loader2, Lock, User } from 'lucide-react';
+import { Laptop, Loader2, Lock, User } from 'lucide-react';
 import { authApi } from '@/lib/api';
 
 export default function LoginPage() {
@@ -23,11 +23,9 @@ export default function LoginPage() {
     try {
       const res = await authApi.login(login, password) as any;
 
-      // Simpan token di localStorage dan cookie
       localStorage.setItem('auth-token', res.token);
       localStorage.setItem('auth-user', JSON.stringify(res.user));
 
-      // Set cookie untuk server component
       document.cookie = `auth-token=${res.token}; path=/; max-age=${60 * 60 * 24 * 7}`;
 
       router.push('/dashboard');
@@ -42,16 +40,14 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        {/* Logo / Title */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-sky-600 rounded-2xl mb-4 shadow-lg">
-            <Lock size={28} className="text-white" />
+            <Laptop size={28} className="text-white" />
           </div>
           <h1 className="text-2xl font-bold text-white">IT Request System</h1>
           <p className="text-slate-400 text-sm mt-1">Resource Group — PT. Unggul Dinamika Utama</p>
         </div>
 
-        {/* Form */}
         <div className="bg-white rounded-2xl shadow-xl p-8">
           <h2 className="text-lg font-semibold text-slate-800 mb-6">Masuk ke Dashboard</h2>
 
@@ -62,7 +58,6 @@ export default function LoginPage() {
           )}
 
           <form onSubmit={handleLogin} className="space-y-4">
-            {/* Login */}
             <div>
               <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
                 Email / Username
@@ -80,7 +75,6 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {/* Password */}
             <div>
               <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
                 Password
@@ -98,7 +92,6 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {/* Submit */}
             <button
               type="submit"
               disabled={loading}

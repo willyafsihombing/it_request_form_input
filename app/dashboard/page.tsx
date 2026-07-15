@@ -76,11 +76,11 @@
             <h1 className="text-2xl font-bold text-slate-800">Dashboard</h1>
             <p className="text-slate-500 text-sm mt-0.5">Ringkasan IT Request — Resource Group</p>
           </div>
-          <Link href="/form"
+          {/* <Link href="/form"
             className="flex items-center gap-2 px-4 py-2.5 bg-sky-600 hover:bg-sky-700 text-white text-sm font-semibold rounded-xl shadow-sm transition-all">
             <FilePlus2 size={15} />
             Buat Request Baru
-          </Link>
+          </Link> */}
         </div>
 
         {/* Stats Grid */}
@@ -163,10 +163,18 @@
                             className="p-1.5 rounded-lg text-slate-400 hover:text-sky-600 hover:bg-sky-50 transition-colors" title="Detail">
                             <ClipboardList size={14} />
                           </Link>
+                          {(req.status === 'approved' || isAdminOrIT) ? (
                           <Link href={`/dashboard/requests/${req.id}/print`} target="_blank"
                             className="p-1.5 rounded-lg text-slate-400 hover:text-green-600 hover:bg-green-50 transition-colors" title="Cetak">
                             <Printer size={14} />
                           </Link>
+                          ) : (
+                          <span className="p-1.5 rounded-lg text-slate-200 cursor-not-allowed" 
+                            title="Print hanya tersedia setelah request di approve oleh IT"
+                            >
+                            <Printer size={15} />
+                          </span>
+                          )}
                         </div>
                       </td>
                     </tr>

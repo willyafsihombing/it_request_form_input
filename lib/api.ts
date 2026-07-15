@@ -44,10 +44,8 @@ async function request<T>(
   return res.json();
 }
 
-// ── Auth ──────────────────────────────────────────
 export const authApi = {
   login: async (login: string, password: string) => {
-    // Login tidak butuh token — langsung fetch tanpa Authorization header
     const res = await fetch(`${API_URL}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -71,7 +69,6 @@ export const authApi = {
   me: () => request('/api/auth/me'),
 };
 
-// ── Requests ──────────────────────────────────────
 export const requestApi = {
   getAll: (params?: {
     status?: string;
@@ -110,7 +107,6 @@ export const requestApi = {
     request(`/api/requests/${id}`, { method: 'DELETE' }),
 };
 
-// ── Stats ──────────────────────────────────────────
 export const statsApi = {
   getStats: (reqName?: string) => {
     const query = new URLSearchParams();

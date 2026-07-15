@@ -1,21 +1,41 @@
 import { notFound } from 'next/navigation';
 import type { ITRequest } from '@/types';
-import PrintButtons from '@/app/dashboard/requests/[id]/print/printButton'; // ← tambahkan import ini
+import PrintButtons from '@/app/dashboard/requests/[id]/print/printButton';
 
 const API = process.env.API_URL || 'http://localhost:8080';
 
 export const dynamic = 'force-dynamic';
 
-// ── Tiny checkbox for print view ──────────────────────────────
+const FS = {
+  base:      12,   
+  label:     11,    
+  checkbox:  10,     
+  header:    13,    
+  title:     22,    
+  subtitle:  15,    
+  subheader: 12,    
+  desc:      12,    
+  descLabel: 12,     
+  sig:       11,    
+  sigLabel:  10,    
+}
+
+function getShortNumber(formNumber: string): string {
+  const match = formNumber.match(/^\d+-ITR-Unggul\d{6}/)
+  return match ? match[0] : formNumber
+}
+
 function CBox({ on, label }: { on: boolean; label?: string }) {
   return (
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 2, marginRight: 8, whiteSpace: 'nowrap' }}>
       <span style={{
         display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-        width: 12, height: 12, border: '1px solid #333', background: 'white',
-        fontSize: 8, fontWeight: 'bold', flexShrink: 0,
+        width: FS.checkbox + 4,  
+        height: FS.checkbox + 4,
+        border: '1px solid #333', background: 'white',
+        fontSize: FS.checkbox, fontWeight: 'bold', flexShrink: 0,
       }}>{on ? 'X' : ''}</span>
-      {label && <span style={{ fontSize: 10, lineHeight: 1.2 }}>{label}</span>}
+      {label && <span style={{ fontSize: FS.label, lineHeight: 1.2 }}>{label}</span>}
     </span>
   );
 }
@@ -41,35 +61,28 @@ export default async function PrintPage({ params } : { params: Promise<{ id: str
   const YELLOW = '#FFFF00';
   const WHITE  = '#ffffff';
 
-  //  const cell = (bg = 'white', xtra: React.CSSProperties = {}): React.CSSProperties => ({
-  //   border: '0.5px solid #555',
-  //   padding: '0 4px',
-  //   verticalAlign: 'middle',
-  //   textAlign: 'left',
-  //   fontFamily: 'Arial, sans-serif',
-  //   fontSize: 10.5,
-  //   background: bg,
-  //   height: 22,
-  //   lineHeight: '22px',
-  //   whiteSpace: 'nowrap',
-  //   overflow: 'hidden',
-  //   ...xtra,
-  // });
+  const shortFormNumber = getShortNumber(r.formNumber)
 
   const cell = (bg = 'white', xtra: React.CSSProperties = {}): React.CSSProperties => ({
     border: '0.5px solid #555',
-    padding: '0 3px',       
+    padding: '0 5px',       
     verticalAlign: 'middle',
     textAlign: 'left',
     fontFamily: 'Arial, sans-serif',
-    fontSize: 10.5,          
+    fontSize: 11.5,          
     background: bg,
-    height: 20.6,            
-    lineHeight: '14px',     
+    height: 21.5,            
+    lineHeight: '16px',     
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     ...xtra,
   });
+
+  const limitLines = (text: string, maxLines: number): string => {
+  if (!text) return ''
+  const lines = text.split('\n')
+  return lines.slice(0, maxLines).join('\n')
+}
 
   return (
   <>
@@ -85,6 +98,7 @@ export default async function PrintPage({ params } : { params: Promise<{ id: str
             transform: scale(0.82);
             transform-origin: top left;
             width: 122%;
+            font-size: 14pt !important
           }
         }
         html { -webkit-print-color-adjust: exact; }
@@ -94,27 +108,23 @@ export default async function PrintPage({ params } : { params: Promise<{ id: str
         }
       `}</style>
 
-        {/* Print / Close buttons */}
         <div className="print-btn no-print">
           <PrintButtons />
         </div>
 
-        {/* ── FORM ── */}
-        <div id='print-area' style={{ padding: '8mm 45mm', maxWidth: '45cm', margin: '0 auto' }}>
+        <div id='print-area' style={{ padding: '8mm 45mm', maxWidth: '100%', margin: '0 auto', width: ' ' }}>
 
-          {/* Title — di luar tabel */}
           <div style={{ position: 'relative', textAlign: 'center', fontFamily: 'Arial', marginBottom: 2 }}>
             <div
               data-form-number={r.formNumber}
               style={{ position: 'absolute', left: 0, top: 2, fontSize: 9, fontWeight: 'bold' }}
             >
-              {r.formNumber}
+              {shortFormNumber}
             </div>
-            <div style={{ fontWeight: 'bold', fontSize: 20, lineHeight: 1.2 }}>Resource Group</div>
-            <div style={{ fontWeight: 'bold', fontSize: 14, lineHeight: 1.4 }}>Information Technology Request Form</div>
+            <div className='print-title' style={{ fontWeight: 'bold', fontSize: 20, lineHeight: 1.2 }}>Resource Group</div>
+            <div className='print-subtitle' style={{ fontWeight: 'bold', fontSize: 14, lineHeight: 1.4 }}>Information Technology Request Form</div>
           </div>
 
-          {/* Sub-header — di luar tabel */}
           <div style={{
             position: 'relative',
             display: 'flex',
@@ -127,7 +137,6 @@ export default async function PrintPage({ params } : { params: Promise<{ id: str
             fontSize: 10.5,
             marginBottom: '-0.7px',
           }}>
-            {/* Center absolute — pas di tengah container */}
             <span style={{
               position: 'absolute',
               left: '50%',
@@ -138,10 +147,8 @@ export default async function PrintPage({ params } : { params: Promise<{ id: str
               Send Completed &amp; signed form to IT Department
             </span>
 
-            {/* Spacer kiri — agar effective date tetap di kanan */}
             <span style={{ flex: 1 }} />
 
-            {/* Effective Date — tetap di kanan */}
             <span style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
               <span>Effective Date</span>
               <span style={{
@@ -158,7 +165,6 @@ export default async function PrintPage({ params } : { params: Promise<{ id: str
             </span>
           </div>
 
-          {/* 20-column main table */}
           <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
             <colgroup>
               <col style={{ width: '11%' }} />
@@ -172,19 +178,10 @@ export default async function PrintPage({ params } : { params: Promise<{ id: str
               <col style={{ width: '5%' }} /><col style={{ width: '5%' }} /><col style={{ width: '5%' }} />
             </colgroup>
             <tbody>
-              {/* Sub-header */}
-              {/* <tr>
-                <td colSpan={14} style={cell('white', { textAlign: 'center' })}>
-                  Send Completed &amp; signed form to IT Department
-                </td>
-                <td colSpan={4} style={cell('white', { textAlign: 'right' })}>Effective Date</td>
-                <td colSpan={2} style={cell(WHITE, { textAlign: 'center', fontWeight: 'bold', fontSize: 12 })}>{r.effectiveDate}</td>
-              </tr> */}
-
-              {/* Section Headers */}
+              
               <tr>
-                <td colSpan={5} style={cell(CYAN, { fontWeight: 'bold', fontSize:'11px' })}>Requester Information</td>
-                <td colSpan={3} style={cell(CYAN, { fontWeight: 'bold', fontSize:'11px' })}>System &amp; Network</td>
+                <td colSpan={5} style={cell(CYAN, { fontWeight: 'bold', fontSize:'12px' })}>Requester Information</td>
+                <td colSpan={3} style={cell(CYAN, { fontWeight: 'bold', fontSize:'12px' })}>System &amp; Network</td>
                 <td colSpan={4} style={cell(CYAN)}>
                   <div style={{ display: 'flex', gap: 1 }}>
                     <CBox on={r.snAdd}       label="Add" />
@@ -192,9 +189,9 @@ export default async function PrintPage({ params } : { params: Promise<{ id: str
                     <CBox on={r.snTerminate} label="Terminate" />
                   </div>
                 </td>
-                <td colSpan={4} style={cell(CYAN, { fontWeight: 'bold', fontSize:'11px' })}>Hardware &amp; Software</td>
+                <td colSpan={4} style={cell(CYAN, { fontWeight: 'bold', fontSize:'12px' })}>Hardware &amp; Software</td>
                 <td colSpan={4} style={cell(CYAN)}>
-                  <div style={{ display: 'flex', justifyContent:'center', gap: 4 }}>
+                  <div style={{ display: 'flex', justifyContent:'center', gap: 0   }}>
                     <CBox on={r.hwAdd}       label="Add" />
                     <CBox on={r.hwChange}    label="Change" />
                     <CBox on={r.hwTerminate} label="Terminate" />
@@ -202,7 +199,6 @@ export default async function PrintPage({ params } : { params: Promise<{ id: str
                 </td>
               </tr>
 
-              {/* Company | LAN VPN Email FS | PC Printer NB */}
               <tr>
                 <td style={cell(YELLOW)}>Company</td>
                 <td colSpan={4} style={cell(YELLOW)}>{ r.reqCompany}</td>
@@ -218,14 +214,13 @@ export default async function PrintPage({ params } : { params: Promise<{ id: str
                     <div style={{ display: 'flex',gap: 50, alignItems:'center' }}>
                       <CBox on={r.hwPC}       label="PC/Desktop" />
                       <CBox on={r.hwPrinter}  label="Printer" />
-                      <span style={{display: 'flex', marginLeft:'-15px', alignItems:'center'}}>
+                      <span style={{display: 'flex', marginLeft:'-17px', alignItems:'center'}}>
                       <CBox on={r.hwNotebook} label="Notebook" />
                       </span>
                     </div>
                   </td>
               </tr>
 
-              {/* Personnel | Intranet | MS Adobe Zoom */}
               <tr>
                 <td style={cell(YELLOW)}>Personnel Name</td>
                 <td colSpan={4} style={cell(YELLOW)}>{r.reqName}</td>
@@ -233,7 +228,7 @@ export default async function PrintPage({ params } : { params: Promise<{ id: str
                     <CBox on={r.snIntranet} label="Intranet" />
                   </td>
                   <td colSpan={8} style={cell('white', {borderTop:'none'})}>
-                    <div style={{ display: 'flex', gap: 35, alignItems:'center' }}>
+                    <div style={{ display: 'flex', gap: 33, alignItems:'center' }}>
                       <CBox on={r.hwMSOffice} label="MS Office Suite" />
                       <CBox on={r.hwAdobe}    label="Adobe" />
                       <CBox on={r.hwZoom}     label="Zoom" />
@@ -241,20 +236,18 @@ export default async function PrintPage({ params } : { params: Promise<{ id: str
                   </td>
               </tr>
 
-              {/* Recipient header | S&N Other | H&S Other */}
               <tr>
-                <td colSpan={5} style={cell(CYAN, { fontWeight: 'bold', fontSize:'11px' })}>Recipient Information</td>
+                <td colSpan={5} style={cell(CYAN, { fontWeight: 'bold', fontSize:'12px' })}>Recipient Information</td>
                 <td colSpan={2} style={cell('white', { border: 'none' })}>Other</td>
                 <td colSpan={5} style={cell()}>{r.snOther}</td>
                 <td colSpan={3} style={cell('white', { border: 'none' })}>Other</td>
                 <td colSpan={5} style={cell()}>{r.hwOther}</td>
               </tr>
 
-              {/* Company(rec) | ERP + PRONTO + SM + actions */}
               <tr>
                 <td style={cell(YELLOW)}>Company</td>
                 <td colSpan={4} style={cell(YELLOW, { border: 'none', borderBottom: '0.7px solid' })}>{r.recCompany}</td>
-                <td colSpan={2} style={cell(CYAN, { fontWeight: 'bold',  fontSize:'11px' })}>ERP</td>
+                <td colSpan={2} style={cell(CYAN, { fontWeight: 'bold',  fontSize:'12px' })}>ERP</td>
                 <td colSpan={5} style={cell(CYAN)}><CBox on={r.erpPronto}      label="PRONTO" /></td>
                 <td colSpan={3} style={cell(CYAN)}><CBox on={r.erpSmartMining} label="SMART MINING" /></td>
                 <td colSpan={5} style={cell(CYAN)}>
@@ -266,7 +259,6 @@ export default async function PrintPage({ params } : { params: Promise<{ id: str
                 </td>
               </tr>
 
-              {/* Dept | Position ID | Sign-on ID */}
               <tr>
                 <td style={cell(YELLOW)}>Department</td>
                 <td colSpan={4} style={cell(YELLOW, { border: 'none', borderBottom: '0.5px solid' })}>{r.recDept}</td>
@@ -275,7 +267,6 @@ export default async function PrintPage({ params } : { params: Promise<{ id: str
                 <td colSpan={3} style={cell()}>*Sign-on ID</td>
                 <td colSpan={5} style={cell(WHITE)}>{r.erpSignOnId}</td>
               </tr>
-              {/* Location | District | Global Profile */}
               <tr>
                 <td style={cell(YELLOW)}>Location</td>
                 <td colSpan={4} style={cell(YELLOW)}>{r.recLocation}</td>
@@ -285,15 +276,13 @@ export default async function PrintPage({ params } : { params: Promise<{ id: str
                 <td colSpan={5} style={cell()}>{r.erpGlobalProfile}</td>
               </tr>
 
-              {/* Personnel(rec) | Ref Sign On */}
               <tr>
                 <td style={cell(YELLOW)}>Personnel Name</td>
                 <td colSpan={4} style={cell(YELLOW)}>{r.recPersonnel}</td>
-                <td colSpan={3} style={cell('white',{border:'none', fontSize: 9 })}>Ref. existing Sign On ID/Name :</td>
-                <td colSpan={12} style={cell('white', { border: 'none', borderRight:'0.5px solid'})}>{r.erpRef}</td>
+                <td colSpan={4} style={cell('white',{border:'none', fontSize: 9 })}>Ref. existing Sign On ID/Name :</td>
+                <td colSpan={11} style={cell('white', { border: 'none', borderRight:'0.5px solid'})}>{r.erpRef}</td>
               </tr>
 
-              {/* EmpID (rowspan) + Title */}
               <tr>
                 <td style={cell(YELLOW)}>Employee ID/NIK</td>
                 <td colSpan={4} style={cell(YELLOW)}>{r.recEmpId}</td>
@@ -305,7 +294,6 @@ export default async function PrintPage({ params } : { params: Promise<{ id: str
                 <td colSpan={15} style={cell('white', { border: 'none', borderRight:'0.5px solid' })}></td>
               </tr>
 
-              {/* Status */}
               <tr>
                 <td style={cell(YELLOW)}>Status</td>
                 <td colSpan={4} style={cell(YELLOW)}>{r.recStatus}</td>
@@ -314,24 +302,24 @@ export default async function PrintPage({ params } : { params: Promise<{ id: str
             </tbody>
           </table>
 
-          {/* Additional Desc + Cost Code */}
-          <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '-0.7px' }}>
+          <table className='desc-section' style={{ width: '100%', borderCollapse: 'collapse', marginTop: '-0.7px' }}>
             <tbody>
               <tr>
                 <td style={{ 
-                  border: '0.5px solid #555', padding: '3px 5px', 
+                  border: '1px solid #555' , padding: '3px 5px', 
                   width: '50%', verticalAlign: 'top', 
-                  fontFamily: 'Arial', fontSize: 9.5 
+                  fontFamily: 'Arial', fontSize: '11px',
+                  boxSizing:'border-box'
                 }}>
-                  <div style={{ fontSize: 8, color: '#444', marginBottom: 2 }}>
+                  <div style={{fontSize: 10.5, color: '#444', marginBottom: 2 }}>
                     Additional Description (Describe the Software / Hardware / Service / Privilege requested)
                   </div>
-                  <div style={{ 
-                    height: 120,           
+                  <div className='desc-section-just' style={{ 
+                    height: 150,           
                     overflow: 'hidden',
                     whiteSpace: 'pre-line', 
-                    fontSize: 9.5, 
-                    lineHeight: 1.4 
+                    fontSize: 11.5, 
+                    lineHeight: 1.4
                   }}>
                     {r.additionalDesc}
                   </div>
@@ -339,22 +327,21 @@ export default async function PrintPage({ params } : { params: Promise<{ id: str
                 <td style={{ 
                   border: '0.5px solid #555', padding: '3px 5px', 
                   width: '50%', verticalAlign: 'top', 
-                  fontFamily: 'Arial', fontSize: 9.5 
+                  fontFamily: 'Arial', fontSize: 12 
                 }}>
                   <div style={{ fontWeight: 'bold', marginBottom: 2, fontSize: 9.5 }}>COST CODE / COA :</div>
-                  <div style={{ fontSize: 9.5 }}>{r.costCode}</div>
+                  <div className='desc-section-just' style={{ fontSize: 9 }}>{r.costCode}</div>
                 </td>
               </tr>
             </tbody>
           </table>
 
-          {/* Justification + Technical Comment */}
           <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '-0.7px' }}>
             <tbody>
               <tr>
-                <td style={{ 
+                <td className='desc-section' style={{ 
                   border: '0.5px solid #555', padding: '2px 5px', 
-                  width: '50%', fontSize: 8.5, fontFamily: 'Arial' 
+                  width: '50%', fontSize: 9.5, fontFamily: 'Arial' 
                 }}>
                   Justification (Describe the business reason for your request)
                 </td>
@@ -363,7 +350,7 @@ export default async function PrintPage({ params } : { params: Promise<{ id: str
                   width: '50%', fontFamily: 'Arial' 
                 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 4 }}>
-                    <span style={{ fontSize: 8.5 }}>Technical Comment (To be completed by IT)</span>
+                    <span style={{ fontSize: 9.5 }}>Technical Comment (To be completed by IT)</span>
                     <span style={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                       {(['AD','AW','CR','EM','IP','EP'] as const).map(t => (
                         <CBox key={t} on={r[`tech${t}` as keyof ITRequest] as boolean} label={t} />
@@ -373,43 +360,42 @@ export default async function PrintPage({ params } : { params: Promise<{ id: str
                 </td>
               </tr>
               <tr>
-                <td style={{ 
+                <td className='desc-section-just' style={{ 
                   border: '0.5px solid #555', padding: '4px 5px', 
                   width: '50%', 
                   verticalAlign: 'top', 
-                  height: 55,  
+                  height: 88,
+                  maxHeight: 88,  
                   overflow: 'hidden',
-                  fontFamily: 'Arial', fontSize: 9.5, 
+                  fontFamily: 'Arial', fontSize: 11.5, 
                   whiteSpace: 'pre-line', 
-                  lineHeight: 1.4 
+                  lineHeight: 1.3 
                 }}>
-                  {r.justification}
+                  {limitLines(r.justification, 7)}
                 </td>
-                <td style={{ 
+                <td className='desc-section-just' style={{ 
                   border: '0.5px solid #555', padding: '4px 5px', 
                   width: '50%', verticalAlign: 'top', 
-                  height: 55,
+                  height: 88,
+                  maxHeight: 88,
                   overflow: 'hidden',
-                  fontFamily: 'Arial', fontSize: 9.5, 
+                  fontFamily: 'Arial', fontSize: 11, 
                   whiteSpace: 'pre-line' 
                 }}>
-                  {r.techComment}
+                  {limitLines(r.techComment, 7)}
                 </td>
               </tr>
             </tbody>
           </table>
 
-          {/* Signatures */}
           <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '-0.7px', backgroundColor:'#e4f2ff' }}>
             <tbody>
-              {/* Header */}
               <tr>
                 <td colSpan={6} style={{ border: '0.5px solid #555', padding: '2px 8px', background: CYAN, fontWeight: 'bold', fontFamily: 'Arial', fontSize: 11 }}>
                   Signature :
                 </td>
               </tr>
 
-              {/* Row 1 — Requester | Sr. Mgr | IT Admin */}
               <tr>
                 <td style={{borderRight: '0.5px solid #555', borderLeft:'0.5px solid #555', padding: '6px 6px', width: '10%', fontFamily: 'Arial', fontSize: 9, whiteSpace: 'nowrap', height: 30 }}>
                   Requester / Date
@@ -431,7 +417,6 @@ export default async function PrintPage({ params } : { params: Promise<{ id: str
                 </td>
               </tr>
 
-              {/* Row 2 — Spt. Dept | HOO | MSDI Mgr */}
               <tr>
                 <td style={{ borderRight: '0.5px solid #555', borderLeft:'0.5px solid #555', padding: '6px 6px', width: '10%', fontFamily: 'Arial', fontSize: 9, whiteSpace: 'nowrap', height: 30 }}>
                   Spt. Dept. / Date
@@ -453,7 +438,6 @@ export default async function PrintPage({ params } : { params: Promise<{ id: str
                 </td>
               </tr>
 
-              {/* Row 3 — Dept. Mgr */}
               <tr>
                 <td style={{ borderRight: '0.5px solid #555', borderLeft:'0.5px solid #555', borderBottom:'0.5px solid #555', padding: '3px 6px', width: '8%', fontFamily: 'Arial', fontSize: 9, whiteSpace: 'nowrap', height: 30 }}>
                   Dept. Mgr / Date
@@ -466,15 +450,6 @@ export default async function PrintPage({ params } : { params: Promise<{ id: str
             </tbody>
           </table>
         </div>
-
-        {/* Auto-print script */}
-      {/* <script dangerouslySetInnerHTML={{ __html: `
-        window.addEventListener('load', function() {
-          document.querySelectorAll('.btn-print').forEach(function(btn) {
-            btn.addEventListener('click', function() { window.print(); });
-          });
-        });
-      `}} /> */}
   </>
   );
   

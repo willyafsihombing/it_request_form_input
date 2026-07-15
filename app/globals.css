@@ -20,9 +20,78 @@
   .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
   .scrollbar-thin::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
 }
+  
+  @media print {
+    .no-print { display: none !important; }
+    body { background: white !important; }
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
 
-@media print {
-  .no-print { display: none !important; }
-  body { background: white !important; }
-  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    aside,
+    nav,
+    header,
+    footer,
+    [data-sidebar] {
+      display: none !important;
+    }
+
+    body,
+    html,
+    #__next,
+    main,
+    .ml-64,
+    .pl-64,
+    [class*="ml-"],
+    [class*="pl-"] {
+      margin-left: 0 !important;
+      padding-left: 0 !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      .bg-slate-50,
+      .bg-gray-50,
+      .bg-slate-100,
+      [class*="bg-slate"],
+      [class*="bg-gray"] {
+      background: white !important;
+    }
+
+    /* Print area full width */
+    #print-area {
+      width: 100% !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      transform: none !important;
+      background: white !important;
+    }
+
+    /* Override font khusus saat print — Additional Desc & Justification kecil */
+    /* Override SEMUA font di print area — termasuk div dan span */
+    #print-area td,
+    #print-area th,
+    #print-area div,
+    #print-area span,
+    #print-area p {
+      font-size: 10pt !important;
+    }
+
+    #print-area .print-title { 
+      font-size: 20pt !important; 
+    }
+    #print-area .print-subtitle { 
+      font-size: 15pt !important; 
+    }
+
+    #print-area .desc-section-just {
+      font-size: 9pt !important;
+      height: 150px;
+      line-height: 1.2;
+    }
+    
+    #print-area .desc-section span {
+      font-size: 12pt !important;
+    }
+  }
 }
+#print-area .desc-section td:first-child {
+      border: 1px solid #555 !important;
+      box-sizing: border-box !important;
+    }

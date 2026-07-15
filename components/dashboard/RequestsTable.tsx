@@ -109,9 +109,7 @@ export default function RequestsTable() {
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-      {/* Toolbar */}
       <div className="px-5 py-4 border-b border-slate-100 flex flex-col sm:flex-row gap-3">
-        {/* Search */}
         <div className="relative flex-1 min-w-0">
           <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
@@ -122,7 +120,6 @@ export default function RequestsTable() {
             className="w-full pl-9 pr-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-400 bg-slate-50"
           />
         </div>
-        {/* Filters */}
         <div className="flex gap-2 flex-shrink-0">
           <select
             value={status}
@@ -156,7 +153,6 @@ export default function RequestsTable() {
         </div>
       </div>
 
-      {/* Table */}
       <div className="overflow-x-auto scrollbar-thin">
         <table className="w-full text-sm">
           <thead>
@@ -229,6 +225,7 @@ export default function RequestsTable() {
                       >
                         <Eye size={15} />
                       </Link>
+                      {(req.status === 'approved' || isAdminOrIT) ? (
                       <Link
                         href={`/dashboard/requests/${req.id}/print`}
                         target="_blank"
@@ -237,6 +234,14 @@ export default function RequestsTable() {
                       >
                         <Printer size={15} />
                       </Link>
+                      ) : (
+                        <span className="p-1.5 rounded-lg text-slate-200 cursor-not-allowed" 
+                        title="Print hanya tersedia setelah request di approve oleh IT"
+                        >
+                        <Printer size={15} />
+                        </span>
+                      )}
+                      
                       <button
                         onClick={() => handleDeleteClick(req.id, req.formNumber)}
                         className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors"
@@ -266,7 +271,6 @@ export default function RequestsTable() {
         </div>
       )}
       
-      {/* Modal Delete */}
       {showModal && deleteTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"
@@ -321,7 +325,6 @@ export default function RequestsTable() {
         </div>    
       )}
 
-      {/* Pagination */}
       <div className="px-5 py-3 border-t border-slate-100 flex items-center justify-between">
         <p className="text-xs text-slate-500">
           {loading ? 'Memuat...' : `${total} request`}

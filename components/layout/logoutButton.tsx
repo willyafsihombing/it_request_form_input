@@ -14,7 +14,6 @@ export default function LogoutButton() {
       await authApi.logout();
     } catch {
     } finally {
-      // Hapus token dari localStorage dan cookie
       localStorage.removeItem('auth-token');
       localStorage.removeItem('auth-user');
       document.cookie = 'auth-token=; path=/; max-age=0';
@@ -40,7 +39,6 @@ export default function LogoutButton() {
         onClick={() => setShowModal(false)}
         />
       <div className="relative bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm mx-4 z-10">
-          {/* Close */}
           <button
             onClick={() => setShowModal(false)}
             className="absolute top-4 right-4 p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
@@ -48,7 +46,6 @@ export default function LogoutButton() {
             <X size={16} />
           </button>
 
-          {/* Text */}
           <h3 className="text-base font-semibold text-slate-800 mb-1">
             Keluar dari sistem?
           </h3>
@@ -56,7 +53,6 @@ export default function LogoutButton() {
             Anda akan keluar dari IT Request System. Pastikan semua pekerjaan sudah tersimpan.
           </p>
 
-          {/* Actions */}
           <div className="flex gap-3">
             <button
               onClick={() => setShowModal(false)}

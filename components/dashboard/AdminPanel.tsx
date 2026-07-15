@@ -49,7 +49,7 @@ export default function AdminPanel({ request }: { request: ITRequest }) {
 
   const isITStaff = userRole === 'staff' || userRole === 'itstaff';
   const isAdmin = userRole === 'admin';
-  const canEdit = isITStaff;
+  const canEdit = isITStaff || isAdmin;
 
   const handleSave = async () => {
   if (!canEdit) return;
@@ -71,24 +71,11 @@ export default function AdminPanel({ request }: { request: ITRequest }) {
 
   return (
     <div className="space-y-4">
-      {/* Current */}
       <div className="flex gap-3 flex-wrap">
         <StatusBadge status={status} />
         <PriorityBadge priority={priority} />
       </div>
 
-      {/* {userRole && (
-        <div className={cn(
-          'px-3 py-1.5 rounded-lg text-xs font-semibold',
-          canEdit
-            ? 'bg-green-50 text-green-700 border border-green-200'
-            : 'bg-amber-50 text-amber-700 border border-amber-200'
-        )}>
-          {canEdit ? '✅ IT Staff — dapat mengedit' : '👁️ Admin — hanya dapat melihat'}
-        </div>
-      )} */}
-
-      {/* Status */}
       <div>
         <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
           <Zap size={11} className="inline mr-1" />Status
@@ -113,7 +100,6 @@ export default function AdminPanel({ request }: { request: ITRequest }) {
         </div>
       </div>
 
-      {/* Priority */}
       <div>
         <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
           Prioritas
@@ -152,7 +138,6 @@ export default function AdminPanel({ request }: { request: ITRequest }) {
           />
         </div> */}
 
-      {/* IT Notes */}
       {canEdit && (
       <div>
         <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
@@ -168,7 +153,6 @@ export default function AdminPanel({ request }: { request: ITRequest }) {
       </div>
       )}
 
-      {/* Save */}
       {canEdit && (
         <button
           onClick={handleSave}

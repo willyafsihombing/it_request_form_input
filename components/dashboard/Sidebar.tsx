@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
-  LayoutDashboard, ClipboardList, FilePlus2, Settings,
+  LayoutDashboard, ClipboardList, Settings, //FilePlus2 -> untuk sidebar buat request
   Monitor, Building2, ChevronRight,
   UserCircle,
 } from 'lucide-react';
@@ -14,7 +14,7 @@ import { useEffect, useState } from 'react';
 const NAV_ITEMS = [
   { href: '/dashboard',          label: 'Dashboard',       icon: LayoutDashboard },
   { href: '/dashboard/requests', label: 'Semua Request',   icon: ClipboardList   },
-  { href: '/form',               label: 'Buat Request',    icon: FilePlus2       },
+  // { href: '/form',               label: 'Buat Request',    icon: FilePlus2       }, -> buat request sementara di hilangkan dahulu
 ];
 
 export default function Sidebar() {
@@ -48,7 +48,7 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className="fixed inset-y-0 left-0 z-50 w-64 bg-slate-900 flex flex-col">
+    <aside className=" no-print fixed inset-y-0 left-0 z-50 w-64 bg-slate-900 flex flex-col">
       {/* Logo */}
       <div className="px-5 py-5 border-b border-slate-700/60">
         <div className="flex items-center gap-3">
@@ -62,7 +62,6 @@ export default function Sidebar() {
         </div>
       </div>
 
-      {/* Company Badge */}
       <div className="mx-4 my-3 px-3 py-2 bg-slate-800/60 rounded-lg border border-slate-700/50">
         <div className="flex items-center gap-2">
           <div className="w-9 h-9 rounded-xl bg-sky-100 flex items-center justify-center flex-shrink-0">
@@ -97,7 +96,6 @@ export default function Sidebar() {
         </div>
       )}
 
-      {/* Navigation */}
       <nav className="flex-1 px-3 py-2 space-y-1 overflow-y-auto scrollbar-thin">
         <p className="text-slate-500 text-xs font-semibold uppercase tracking-wider px-2 mb-2 mt-1">Menu</p>
 
