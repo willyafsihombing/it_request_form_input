@@ -2,9 +2,13 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useDialog } from '@/components/ui/DiaologProvider';
 import { Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { requestApi } from '@/lib/api'; 
+import { employeeApi } from '@/lib/employee-api';
+import EmployeeAutocomplete from '@/components/employee/EmployeeAutocomplete';
+import { recipientFromEmployee, clearedRecipient } from '@/lib/employee-mapping';
 
 
 const INIT = {
@@ -60,36 +64,73 @@ function CB({ label, checked, onChange }: { label: string; checked: boolean; onC
 
 type FormData = typeof INIT;
 
-export default function ITRequestForm() {
+interface Props {
+  mode?: 'create' | 'edit';
+  requestId?: string;
+  initial?: Record<string, unknown>;
+}
+
+function pickForm(src: Record<string, unknown>): FormData {
+  const out: Record<string, unknown> = { ...INIT };
+  for (const k of Object.keys(INIT)) {
+    const v = src[k];
+    if (v !== undefined && v !== null) out[k] = v;
+  }
+  return out as FormData;
+}
+
+export default function ITRequestForm({mode = 'create', requestId, initial}: Props) {
   const router = useRouter();
-  const [data, setData] = useState<FormData>(INIT);
+  const dialog = useDialog();
+  const [data, setData] = useState<FormData>(initial ? pickForm(initial) : INIT);
+  const isEdit = mode === 'edit';
   const [loadingNumber, setLoadingNumber] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [role, setRole] = useState('');
 
   useEffect(() => {
     setLoadingNumber(false);
 
-    const useStr = localStorage.getItem('auth-user');
+    if (isEdit) {
+    try {
+      const user = JSON.parse(localStorage.getItem('auth-user') || 'null');
+      setRole(user?.role || '');
+    } catch {}
+    return;
+  }
 
-    if(useStr) {
-      try{
-        const user = JSON.parse(useStr);
-        setData(p => ({
-          ...p,
-          recDept : user.department || p.recDept,
-          recEmpId: user.employeeID || p.recEmpId,
-          recPersonnel: user.personnelName || p.recPersonnel,
-          reqName: user.fullName || p.reqName,
-          sigRequester: user.fullName || p.reqName
-        }))
-      }catch {  
-        // 
-      }
-      console.log(useStr)
+    let userRole = '';
+    let fullName = '';
+    try{
+      const user = JSON.parse( localStorage.getItem('auth-user') || 'null');
+      userRole = user?.role || '';
+      fullName = (user?.fullName || '').toUpperCase();
+    }catch{
+    }
+    
+    setRole(userRole)
+
+    if (fullName) {
+      setData(p => ({...p, reqName: fullName, sigRequester: fullName}));  
     }
 
-  }, []);
+    if (userRole !== 'user')return;
+    setData(p => ({
+      ...p,
+      reqName:fullName,
+      sigRequester: fullName,
+    }));
+    employeeApi
+      .me()
+  .then(res => {
+    const emp = res.user?.employee;
+    if (!emp) return;
+    const name = emp.nama.toUpperCase();
+    setData(p => ({ ...p, reqName: name, sigRequester: name }));
+  })
+  .catch(() => {});
+}, []);
 
   const u = (k: keyof FormData, v: unknown) => setData(p => ({ ...p, [k]: v }));
   const tog = (k: keyof FormData) => setData(p => ({ ...p, [k]: !p[k as keyof typeof p] }));
@@ -111,6 +152,18 @@ export default function ITRequestForm() {
   setSubmitting(true);
   try {
     const { formNumber, ...submitData } = data;
+
+    if (isEdit && requestId) {
+    await requestApi.reSubmit(requestId, submitData);
+    dialog.success(
+      'Perubahan tersimpan dan request diajukan ulang. Statusnya kembali Pending.',
+      'Berhasil Diajukan Ulang',
+    );
+    router.push(`/dashboard/requests/${requestId}`);
+    router.refresh();
+    return;
+  }
+
     const created = await requestApi.create(submitData) as any;
     router.push(`/form/success?id=${created.id}&form=${created.formNumber}`);
   } catch (err: any) {
@@ -134,6 +187,10 @@ export default function ITRequestForm() {
     'bg-yellow-50 font-medium transition-all';
   const ta = `${inp} resize-vertical w-full min-h-[120px]`;
   const grid2 = 'grid grid-cols-1 sm:grid-cols-2 gap-x-6';
+
+  const lockedToList = role === 'user';
+
+  console.log('recPersonnel state =', JSON.stringify(data.recPersonnel));
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -175,18 +232,49 @@ export default function ITRequestForm() {
         <input value={data.reqCompany} disabled className={inp + ' cursor-not-allowed opacity-60'} />
       </Row>
       <Row label="Personnel Name" required>
-        <input value={data.reqName} onChange={e => u('reqName', e.target.value)} disabled className={inp} />
-      </Row>
-
+  <input
+    value={data.reqName}
+    onChange={e => {
+      const v = e.target.value.toUpperCase();
+      u('reqName', v);
+      u('sigRequester', v);
+    }}
+    disabled={lockedToList}
+    className={inp + ' cursor-not-allowed opacity-60'}
+  />
+</Row>
       <Sec icon="📦" title="Recipient Information" bg="bg-sky-50" color="text-sky-800" />
       <div className={grid2}>
+        <Row label="Personnel Name">
+          <EmployeeAutocomplete
+            strict={lockedToList}
+            value={data.recPersonnel}
+            onChange={v => u('recPersonnel', v.toUpperCase())}
+            onSelect={emp => setData(p => ({ ...p, ...recipientFromEmployee(emp) }))}
+            onClear={() => setData(p => ({...p, ...clearedRecipient() }))}  
+            className={inp}
+          />
+        </Row>
         <Row label="Company"><input value={data.recCompany} disabled className={inp + ' cursor-not-allowed opacity-60'} /></Row>
-        <Row label="Department"><input value={data.recDept} disabled onChange={e => u('recDept', e.target.value)} className={inp} /></Row>
+        <Row label="Department"><input value={data.recDept} disabled={lockedToList} onChange={e => u('recDept', e.target.value)} className={inp+ (lockedToList ?' cursor-not-allowed opacity-60' : '')  } /></Row>        
         <Row label="Location"><input value={data.recLocation} disabled className={inp + ' cursor-not-allowed opacity-60'} /></Row>
-        <Row label="Personnel Name"><input value={data.recPersonnel} onChange={e => u('recPersonnel', e.target.value.toUpperCase())} className={inp} /></Row>
-        <Row label="Employee ID/NIK"><input value={data.recEmpId} onChange={e => u('recEmpId', e.target.value.replace(/[^0-9]/g, ''))} className={inp} /></Row>
-        <Row label="Title"><input value={data.recTitle} onChange={e => u('recTitle', e.target.value.toUpperCase())} className={inp} /></Row>
+        <Row label="Employee ID/NIK">
+          <input
+            value={data.recEmpId}
+            onChange={e => u('recEmpId', e.target.value.replace(/[^0-9]/g, ''))}
+            disabled={lockedToList}
+            className={inp + (lockedToList ? ' cursor-not-allowed opacity-60' : '')}
+          />
+        </Row>
         <Row label="Status"><input value={data.recStatus} disabled className={inp + ' cursor-not-allowed opacity-60'} /></Row>
+        <Row label="Title">
+          <input
+            value={data.recTitle}
+            onChange={e => u('recTitle', e.target.value.toUpperCase())}
+            disabled={lockedToList}
+            className={inp + (lockedToList ? ' cursor-not-allowed opacity-60' : '')}
+          />
+        </Row>
       </div>
 
       <Sec icon="🌐" title="System & Network" bg="bg-green-50" color="text-green-800" />
@@ -278,10 +366,11 @@ export default function ITRequestForm() {
         >
           {submitting
             ? <><Loader2 size={16} className="animate-spin" /> Mengirim Request...</>
-            : '📤 Kirim IT Request'}
+            : isEdit
+              ? '📤 Simpan & Ajukan Ulang'
+              : '📤 Kirim IT Request'}
         </button>
       </div>
     </div>
   );
 }
-

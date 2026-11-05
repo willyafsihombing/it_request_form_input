@@ -1,26 +1,25 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { LogOut, X } from 'lucide-react';
 import { authApi } from '@/lib/api';
 import { useState } from 'react';
 
 export default function LogoutButton() {
-  const router = useRouter();
   const [showModal, setShowModal] = useState(false)
   const [loading, setLoading] = useState(false)
   const handleLogout = async () => {
+    if(loading) return;
+    setLoading(true)
+
+    localStorage.removeItem('auth-token');
+    localStorage.removeItem('auth-user');
+
     try {
       await authApi.logout();
     } catch {
-    } finally {
-      localStorage.removeItem('auth-token');
-      localStorage.removeItem('auth-user');
-      document.cookie = 'auth-token=; path=/; max-age=0';
 
-      router.push('/login');
-      router.refresh();
-    }
+    } 
+    window.location.href = '/login'
   };
 
   return (

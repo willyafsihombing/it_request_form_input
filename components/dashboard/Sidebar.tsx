@@ -5,15 +5,24 @@ import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard, ClipboardList, Settings, //FilePlus2 -> untuk sidebar buat request
   Monitor, Building2, ChevronRight,
-  UserCircle,
+  UserCircle, Users,
+  type LucideIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import LogoutButton from '@/components/layout/logoutButton';
 import { useEffect, useState } from 'react';
 
-const NAV_ITEMS = [
-  { href: '/dashboard',          label: 'Dashboard',       icon: LayoutDashboard },
-  { href: '/dashboard/requests', label: 'Semua Request',   icon: ClipboardList   },
+type NavItem = {
+  href: string;
+  label: string;
+  icon: LucideIcon;
+  adminOnly?: boolean;
+};
+
+const NAV_ITEMS: NavItem[] = [
+  { href: '/dashboard',           label: 'Dashboard',            icon: LayoutDashboard },
+  { href: '/dashboard/employees', label: 'Master Data Karyawan', icon: Users, adminOnly: true },
+  { href: '/dashboard/requests',  label: 'IT Requests',          icon: ClipboardList   },
   // { href: '/form',               label: 'Buat Request',    icon: FilePlus2       }, -> buat request sementara di hilangkan dahulu
 ];
 
@@ -47,17 +56,27 @@ export default function Sidebar() {
     staff:    'Staff',
   };
 
+  // Sembunyikan menu khusus admin dari role lain
+  const visibleItems = NAV_ITEMS.filter(
+    (item) => !item.adminOnly || currentUser?.role === 'admin'
+  );
+
   return (
     <aside className=" no-print fixed inset-y-0 left-0 z-50 w-64 bg-slate-900 flex flex-col">
-      {/* Logo */}
-      <div className="px-5 py-5 border-b border-slate-700/60">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-sky-500 flex items-center justify-center flex-shrink-0">
-            <Monitor size={18} className="text-white" />            
+      <div className="px-7 py-5 border-b border-slate-700/60">
+        <div className="flex items-center gap-2">
+          <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0">
+            <img
+              src="/img/nexora-rev1.png"
+              alt='logo-unggul'
+              width={2}
+              height={2}
+              className='w-full h-full object-contain'
+            />
           </div>
         <div>
-            <p className="text-white font-bold text-sm leading-tight">IT Request</p>
-            <p className="text-slate-400 text-xs">Resource Group</p>
+            <p className="text-white font-bold text-sm leading-tight"></p>
+            <p className="text-slate-200 text-[12px] font-medium leading-tight">One Platform. Everything Connected.</p>
           </div>
         </div>
       </div>
@@ -72,7 +91,7 @@ export default function Sidebar() {
               height={2}
               className='w-full h-full object-contain'
             />
-          </div>          
+          </div>
             <span className="text-slate-300 text-xs font-medium leading-tight">PT. Unggul Dinamika Utama</span>
         </div>
       </div>
@@ -88,7 +107,6 @@ export default function Sidebar() {
                 {currentUser.fullName}
               </p>
               <p className="text-sky-400 text-xs truncate">
-                Department
                 {currentUser.department ? ` ${currentUser.department}` : ''}
               </p>
             </div>
@@ -99,7 +117,7 @@ export default function Sidebar() {
       <nav className="flex-1 px-3 py-2 space-y-1 overflow-y-auto scrollbar-thin">
         <p className="text-slate-500 text-xs font-semibold uppercase tracking-wider px-2 mb-2 mt-1">Menu</p>
 
-        {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
+        {visibleItems.map(({ href, label, icon: Icon }) => {
           const active = isActive(href);
           return (
             <Link

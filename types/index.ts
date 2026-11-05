@@ -86,6 +86,18 @@ export interface DashboardStats {
   thisMonth: number;
 }
 
+export interface Employee {
+  id: string;            
+  nik: string;
+  nama: string;
+  jabatan: string;
+  departemen: string;
+  level: string;
+  staffType: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export const STATUS_LABELS: Record<RequestStatus, string> = {
   pending: 'Pending',
   in_review: 'In Review',
@@ -99,3 +111,4 @@ export const PRIORITY_LABELS: Record<RequestPriority, string> = {
   high: 'High',
   urgent: 'Urgent',
 };
+

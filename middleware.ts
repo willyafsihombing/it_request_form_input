@@ -4,46 +4,42 @@ import { NextRequest, NextResponse } from 'next/server';
 function isTokenExpired(token: string): boolean {
   try {
     const payload = token.split('.')[1];
-    const decoded = JSON.parse(Buffer.from(payload, 'base64').toString('utf-8'));
-    
-    // ← Debug
-    console.log('Token exp:', new Date(decoded.exp * 1000));
-    console.log('Now:', new Date());
-    console.log('Expired:', decoded.exp * 1000 < Date.now());
-    
-    return decoded.exp * 1000 < Date.now();
+    const decoded = JSON.parse(Buffer.from(payload, 'base64url').toString('utf-8'));
+    return !decoded.exp || decoded.exp * 1000 < Date.now();
   } catch {
     return true;
   }
 }
 
 export function middleware(req: NextRequest) {
-  const token = req.cookies.get('auth-token')?.value;
-  const { pathname } = req.nextUrl;
+  const rawToken = req.cookies.get('auth-token')?.value;
+  const { pathname, searchParams } = req.nextUrl;
 
-  // Route yang tidak perlu login
-  const publicRoutes = ['/login', '/form', '/dasboard/requests'];
+  const token = rawToken && !isTokenExpired(rawToken) ? rawToken : undefined;
 
-  const isPrintRoute = pathname.includes('/print')
+  const publicRoutes = ['/login', '/form'];
+  const isPrintRoute = pathname.includes('/print');
+  const isPublic = publicRoutes.some(r => pathname.startsWith(r)) || isPrintRoute;
 
-  const isPublic = publicRoutes.some(r => pathname.startsWith(r)) || isPrintRoute
-
-  // Kalau belum login dan bukan public route → redirect ke login
-  // tambahan remote auth token ketika browser tidak digunakan lagi
   if (!token && !isPublic) {
-    const response = NextResponse.redirect(new URL('/login', req.url))
-    response.cookies.delete('auth-token')
-    return response
+    const res = NextResponse.redirect(new URL('/login?expired=1', req.url));
+    res.cookies.delete('auth-token');
+    return res;
   }
 
-  // Kalau sudah login dan akses /login → redirect ke dashboard
-  if (token && pathname === '/login') {
+  if (!token && rawToken && pathname === '/login') {
+    const res = NextResponse.next();
+    res.cookies.delete('auth-token');
+    return res;
+  }
+
+  if (token && pathname === '/login' && !searchParams.has('expired')) {
     return NextResponse.redirect(new URL('/dashboard', req.url));
-  } 
+  }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|public).*)'],
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|img|.*\\..*).*)',],
 };

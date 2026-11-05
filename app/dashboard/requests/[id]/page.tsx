@@ -1,14 +1,31 @@
 // app/dashboard/requests/[id]/page.tsx
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Printer, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Printer, ExternalLink, Pencil } from 'lucide-react';
 import { formatDateTime } from '@/lib/utils';
 import { StatusBadge, PriorityBadge } from '@/components/ui/badges';
 import AdminPanel from '@/components/dashboard/AdminPanel';
+import ResubmitButton from '@/components/dashboard/ResubmitButton';
 import type { ITRequest, RequestStatus, RequestPriority } from '@/types';
 import { requestApi } from '@/lib/api';
+import { cookies } from 'next/headers';
 
 export const dynamic = 'force-dynamic';
+
+async function getCurrentRole(): Promise<string | null> {
+  const token = (await cookies()).get('auth-token')?.value;
+  if (!token) return null;
+
+  try {
+    const payload = JSON.parse(
+      Buffer.from(token.split('.')[1], 'base64url').toString('utf8')
+    );
+    return payload.role ?? null; // ← sesuaikan nama claim role
+  } catch {
+    return null;
+  }
+}
+
 
 function CBRow({ on, label }: { on: boolean; label: string }) {
   return (
@@ -56,9 +73,12 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
   const r = await requestApi.getById(id) as ITRequest | null;
   if (!r) notFound();
 
+  const role = await getCurrentRole();
+  const isAdminOrIT = role === 'admin' || role === 'staff';
+  const canPrint = r.status === 'approved' && isAdminOrIT;
+
   return (
     <div className="flex-1 p-6">
-      {/* Header */}
       <div className="flex items-start justify-between mb-6">
         <div className="flex items-center gap-3">
           <Link href="/dashboard/requests"
@@ -77,11 +97,24 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
             </p>
           </div>
         </div>
-        <Link href={`/dashboard/requests/${r.id}/print`} target="_blank"
-          className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold rounded-xl shadow-sm transition-all">
-          <Printer size={14} /> Cetak Form
-          <ExternalLink size={12} className="opacity-70" />
-        </Link>
+        <div className="flex items-center gap-2">
+          {r.status === 'rejected' && <ResubmitButton id={r.id} reqName={r.reqName} />}
+          {canPrint ? (
+          <Link href={`/dashboard/requests/${r.id}/print`} target="_blank"
+            className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold rounded-xl shadow-sm transition-all">
+            <Printer size={14} /> Cetak Form
+            <ExternalLink size={12} className="opacity-70" />
+          </Link>
+          ) : (
+            <span
+              className="flex items-center gap-2 px-4 py-2 bg-slate-200 text-slate-400 text-sm font-semibold rounded-xl cursor-not-allowed"
+              title="Cetak hanya tersedia setelah request di-approve"
+            >
+              <Printer size={14} /> Cetak Form
+              <ExternalLink size={12} className="opacity-70" />
+            </span>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">

@@ -69,7 +69,7 @@
     ];
 
     return (
-      <div className="flex-1 p-6 space-y-6">
+      <div className="flex-1 min-w-0 p-6 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -83,14 +83,12 @@
           </Link> */}
         </div>
 
-        {/* Stats Grid */}
         <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
           {STATS.map((s) => (
             <StatsCard key={s.title} {...s} />
           ))}
         </div>
 
-        {/* Recent Requests */}
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
           <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
             <div>
@@ -185,7 +183,6 @@
           </div>
         </div>
 
-        {/* Status breakdown */}
         <div className="grid grid-cols-2 gap-4">
           <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
             <h3 className="font-semibold text-slate-700 mb-4">Distribusi Status</h3>

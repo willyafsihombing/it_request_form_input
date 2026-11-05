@@ -3,8 +3,11 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'
+const API = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080').replace(/\/+$/, '');
 
+function url(path: string) {
+  return `${API}${path.startsWith('/') ? '' : '/'}${path}`;
+}
 export default function PrintButtons() {
   const router = useRouter();
   const [downloading, setDownloading] = useState(false);
@@ -24,12 +27,12 @@ const handleDownloadPDF = async () => {
   setDownloading(true)
   try {
     const formNumberEl = document.querySelector('[data-form-number]')
-    const id = window.location.pathname.split('/')[3] // ambil ID dari URL
+    const id = window.location.pathname.split('/')[3]
 
-    const res = await fetch(`${API_URL}/api/requests/${id}/pdf`)
+    const res = await fetch(url(`/api/requests/${id}/pdf`), {
+      credentials: 'include'
+    })
 
-    // console.log('All headers:', [...res.headers.entries()])
-    // console.log('Content-Disposition:', res.headers.get('Content-Disposition'))
     if (!res.ok) throw new Error('Gagal generate PDF')
 
     const disposition = res.headers.get('Content-Disposition') ?? ''
@@ -37,13 +40,13 @@ const handleDownloadPDF = async () => {
     const fileName = match?.[1] ?? 'IT-Request.pdf'
 
     const blob = await res.blob()
-    const url = URL.createObjectURL(blob)
+    const blobUrl = URL.createObjectURL(blob)
 
     const a = document.createElement('a')
-    a.href = url
+    a.href = blobUrl
     a.download = fileName
     a.click()
-    URL.revokeObjectURL(url)
+    URL.revokeObjectURL(blobUrl)
 
   } catch (err) {
     alert('Gagal download PDF')

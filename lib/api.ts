@@ -1,4 +1,9 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'
+import { Employee } from '@/types';
+import { redirect } from 'next/navigation';
+
+const API_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080').replace(/\/+$/, '');
+
+let redirecting = false
 
 async function getToken(): Promise<string | null> {
     if(typeof window !== 'undefined') {
@@ -8,6 +13,22 @@ async function getToken(): Promise<string | null> {
     const { cookies } = await import('next/headers')
     const cookieStore = await cookies()
     return cookieStore.get('auth-token')?.value || null
+}
+
+async function endSession() {
+  if (redirecting) return;
+  redirecting = true;
+
+  const hadToken = !!localStorage.getItem('auth-token')
+  
+  try{
+    localStorage.removeItem('auth-token');
+    localStorage.removeItem('auth-user');
+    await fetch(`${API_URL}/api/auth/logout`, {method:'POST', credentials:'include'})
+  }catch{}
+  if (!window.location.pathname.startsWith('/login')){
+    window.location.href = hadToken ? '/login?expired=1' : '/login'
+  }
 }
 
 async function request<T>(
@@ -27,12 +48,7 @@ async function request<T>(
   });
 
   if (res.status === 401) {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('auth-token')
-      localStorage.removeItem('auth-user')
-      document.cookie = 'auth-token=; path=/; max-age=0';
-      window.location.href='/login';
-    }
+    if (typeof window !== 'undefined') await endSession();
     throw new Error('Session Expired')
   }
 
@@ -48,6 +64,7 @@ export const authApi = {
   login: async (login: string, password: string) => {
     const res = await fetch(`${API_URL}/api/auth/login`, {
       method: 'POST',
+      credentials:'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ login, password }),
     });
@@ -61,6 +78,7 @@ export const authApi = {
   logout: async () => {
     const res = await fetch(`${API_URL}/api/auth/logout`, {
       method: 'POST',
+      credentials:'include',
       headers: { 'Content-Type': 'application/json' },
     });
     return res.json();
@@ -69,14 +87,14 @@ export const authApi = {
   me: () => request('/api/auth/me'),
 };
 
-export const requestApi = {
+  export const requestApi = {
   getAll: (params?: {
     status?: string;
     priority?: string;
     search?: string;
     page?: number;
     limit?: number;
-    reqName?: string;
+    reqName?: string; 
   }) => {
     const query = new URLSearchParams();
     if (params?.status)   query.set('status',   params.status);
@@ -87,6 +105,12 @@ export const requestApi = {
     if (params?.reqName)  query.set('reqName',  params.reqName);
     return request(`/api/requests?${query.toString()}`);
   },
+
+  reSubmit: (id: string, data: unknown) =>
+    request(`/api/requests/${id}/resubmit`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }), 
 
   getById: (id: string) =>
     request(`/api/requests/${id}`),
@@ -113,4 +137,36 @@ export const statsApi = {
     if(reqName) query.set('reqName', reqName);
     return request(`/api/stats?${query.toString()}`);
   } 
+};
+
+export type EmployeeInput = Omit<Employee, 'id' | 'created_at' | 'updated_at'>;
+
+type EmployeeListResponse = Employee[] | { data: Employee[] };
+
+export const getEmployees = {
+  getAll: (params?: { search?: string; departemen?: string }) => {
+    const query = new URLSearchParams();
+    if (params?.search)     query.set('search',     params.search);
+    if (params?.departemen) query.set('departemen', params.departemen);
+    const qs = query.toString();
+    return request<EmployeeListResponse>(`/api/employees${qs ? `?${qs}` : ''}`);
+  },
+
+  getById: (id: string) =>
+    request<{ data: Employee }>(`/api/employees/${id}`),
+
+  create: (data: EmployeeInput) =>
+    request<{ data: Employee }>('/api/employees', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  update: (id: string, data: Partial<EmployeeInput>) =>
+    request<{ data: Employee }>(`/api/employees/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
+
+  delete: (id: string) =>
+    request(`/api/employees/${id}`, { method: 'DELETE' }),
 };

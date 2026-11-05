@@ -7,7 +7,7 @@ export default function FormPage() {
     <div className="min-h-screen bg-slate-50">
       <div className="bg-slate-900 text-white shadow-sm">
         <div className="max-w-4xl mx-auto px-6 py-4 flex items-center gap-4">
-          <Link href="/dashboard"
+          <Link href="/dashboard/requests"
             className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors">
             <ArrowLeft size={16} />
           </Link>

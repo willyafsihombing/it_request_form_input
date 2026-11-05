@@ -304,7 +304,7 @@ export default function RequestsTable() {
                 Batal
               </button>
               <button
-                onClick={handleDeleteConfirm} // ← callback, bukan langsung dipanggil
+                onClick={handleDeleteConfirm}
                 disabled={deleteLoading}
                 className="flex-1 py-2.5 text-sm font-semibold bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white rounded-xl transition-colors flex items-center justify-center gap-2"
               >

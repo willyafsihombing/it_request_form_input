@@ -2,7 +2,11 @@ import { notFound } from 'next/navigation';
 import type { ITRequest } from '@/types';
 import PrintButtons from '@/app/dashboard/requests/[id]/print/printButton';
 
-const API = process.env.API_URL || 'http://localhost:8080';
+const API = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080').replace(/\/+$/, '');
+
+function url(path: string) {
+  return `${API}${path.startsWith('/') ? '' : '/'}${path}`;
+}
 
 export const dynamic = 'force-dynamic';
 
@@ -40,12 +44,13 @@ function CBox({ on, label }: { on: boolean; label?: string }) {
   );
 }
 
+
 export default async function PrintPage({ params } : { params: Promise<{ id: string }> }){
   const { id } = await params
 
   let r: ITRequest
   try{
-  const res = await fetch(`${API}/api/requests/${id}`, {
+  const res = await fetch(url(`/api/requests/${id}`), {
     cache: 'no-store',
     headers: { 'Content-Type': 'application/json' },
  });
