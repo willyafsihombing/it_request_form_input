@@ -75,7 +75,7 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
 
   const role = await getCurrentRole();
   const isAdminOrIT = role === 'admin' || role === 'staff';
-  const canPrint = r.status === 'approved' && isAdminOrIT;
+  const canPrint = r.status === 'approved' || isAdminOrIT;
 
   return (
     <div className="flex-1 p-6">

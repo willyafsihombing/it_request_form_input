@@ -2,12 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { API_URL } from '@/lib/api';
 
-const API = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080').replace(/\/+$/, '');
-
-function url(path: string) {
-  return `${API}${path.startsWith('/') ? '' : '/'}${path}`;
-}
 export default function PrintButtons() {
   const router = useRouter();
   const [downloading, setDownloading] = useState(false);
@@ -29,11 +25,15 @@ const handleDownloadPDF = async () => {
     const formNumberEl = document.querySelector('[data-form-number]')
     const id = window.location.pathname.split('/')[3]
 
-    const res = await fetch(url(`/api/requests/${id}/pdf`), {
+    const res = await fetch(`${API_URL}/api/requests/${id}/pdf`, {
       credentials: 'include'
     })
 
-    if (!res.ok) throw new Error('Gagal generate PDF')
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    console.error('PDF error', res.status, text);
+    throw new Error(`Gagal generate PDF (HTTP ${res.status})`);
+  }
 
     const disposition = res.headers.get('Content-Disposition') ?? ''
     const match = disposition.match(/filename="?([^"]+)"?/)
@@ -49,6 +49,7 @@ const handleDownloadPDF = async () => {
     URL.revokeObjectURL(blobUrl)
 
   } catch (err) {
+    console.error(err)
     alert('Gagal download PDF')
   } finally {
     setDownloading(false)

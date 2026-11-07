@@ -12,7 +12,7 @@ import {
 } from '@/lib/employee-api';
 
 interface Props {
-  employee: Employee | null; // null = tambah baru
+  employee: Employee | null;
   departments: string[];
   onClose: () => void;
   onSaved: () => void;

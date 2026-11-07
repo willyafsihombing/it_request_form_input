@@ -1,4 +1,7 @@
+import { API_URL } from '@/lib/api';
+
 export type StaffType = 'staff' | 'non_staff';
+
 
 export interface Employee {
   id: string;
@@ -100,7 +103,7 @@ function bearerHeader(): Record<string, string> {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
-const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'.replace(/\/+$/, '')
+const API = API_URL
 
 function url(path: string) {
   return `${API}${path.startsWith('/') ? '' : '/'}${path}`;
@@ -190,7 +193,7 @@ export const employeeApi = {
   },
 
   accountStatus(ids: string[]) {
-    return request<{accounts: Record<string, string> }>('api/employees/accounts/status', {
+    return request<{accounts: Record<string, string> }>('/api/employees/accounts/status', {
       method: 'POST',
       body: JSON.stringify({ids}),
     });

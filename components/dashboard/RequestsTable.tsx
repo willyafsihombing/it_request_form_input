@@ -160,7 +160,7 @@ export default function RequestsTable() {
               <th className="text-left px-4 py-3 font-semibold text-slate-600 whitespace-nowrap">No. Form</th>
               <th className="text-left px-4 py-3 font-semibold text-slate-600 whitespace-nowrap">Requester</th>
               <th className="text-left px-4 py-3 font-semibold text-slate-600 whitespace-nowrap">Penerima / Dept</th>
-              <th className="text-left px-4 py-3 font-semibold text-slate-600 whitespace-nowrap">Deskripsi</th>
+              {/* <th className="text-left px-4 py-3 font-semibold text-slate-600 whitespace-nowrap">Deskripsi</th> */}
               <th className="text-left px-4 py-3 font-semibold text-slate-600 whitespace-nowrap">Status</th>
               <th className="text-left px-4 py-3 font-semibold text-slate-600 whitespace-nowrap">Prioritas</th>
               <th className="text-left px-4 py-3 font-semibold text-slate-600 whitespace-nowrap">Tanggal</th>
@@ -201,11 +201,11 @@ export default function RequestsTable() {
                     <p className="font-medium text-slate-800 whitespace-nowrap">{req.recPersonnel || '—'}</p>
                     <p className="text-xs text-slate-400 mt-0.5">{req.recDept} · {req.recLocation}</p>
                   </td>
-                  <td className="px-4 py-3 max-w-[200px]">
+                  {/* <td className="px-4 py-3 max-w-[200px]">
                     <p className="text-slate-600 text-xs line-clamp-2 whitespace-pre-line">
                       {req.additionalDesc || '—'}
                     </p>
-                  </td>
+                  </td> */}
                   <td className="px-4 py-3">
                     <StatusBadge status={req.status as RequestStatus} />
                   </td>

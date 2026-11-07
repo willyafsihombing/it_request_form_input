@@ -1,12 +1,8 @@
 import { notFound } from 'next/navigation';
 import type { ITRequest } from '@/types';
 import PrintButtons from '@/app/dashboard/requests/[id]/print/printButton';
+import { API_URL } from '@/lib/api';
 
-const API = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080').replace(/\/+$/, '');
-
-function url(path: string) {
-  return `${API}${path.startsWith('/') ? '' : '/'}${path}`;
-}
 
 export const dynamic = 'force-dynamic';
 
@@ -50,7 +46,7 @@ export default async function PrintPage({ params } : { params: Promise<{ id: str
 
   let r: ITRequest
   try{
-  const res = await fetch(url(`/api/requests/${id}`), {
+  const res = await fetch(`${API_URL}/api/requests/${id}`, {
     cache: 'no-store',
     headers: { 'Content-Type': 'application/json' },
  });

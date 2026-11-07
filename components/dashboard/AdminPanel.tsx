@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import { StatusBadge, PriorityBadge } from '@/components/ui/badges';
 import type { RequestStatus, RequestPriority, ITRequest } from '@/types';
 import { requestApi } from '@/lib/api';
+import { useDialog } from '@/components/ui/DiaologProvider';
 
 const STATUS_OPTIONS: { value: RequestStatus; label: string }[] = [
   { value: 'pending',   label: 'Pending'   },
@@ -25,6 +26,7 @@ const PRIORITY_OPTIONS: { value: RequestPriority; label: string }[] = [
 
 export default function AdminPanel({ request }: { request: ITRequest }) {
   const router = useRouter();
+  const dialog = useDialog();
   const [status,     setStatus]     = useState<RequestStatus>(request.status);
   const [priority,   setPriority]   = useState<RequestPriority>(request.priority);
   const [assignedTo, setAssignedTo] = useState(request.assignedTo || '');
@@ -53,17 +55,38 @@ export default function AdminPanel({ request }: { request: ITRequest }) {
 
   const handleSave = async () => {
   if (!canEdit) return;
+
+  if (status === 'rejected' && !itNotes.trim()) {
+    dialog.error('Isi Catatan IT sebagai alasan penolakan.', 'Catatan Wajib Diisi');
+    return;
+  }
+
+  const isReject = status === 'rejected';
+  const ok = await dialog.confirm({
+    title: isReject ? 'Tolak Request?' : 'Simpan Perubahan?',
+    message: isReject
+      ? `Request ${request.formNumber} akan ditolak. Pemohon dapat mengedit dan mengajukan ulang.`
+      : `Perubahan pada request ${request.formNumber} akan disimpan.`,
+    confirmText: isReject ? 'Ya, tolak' : 'Ya, simpan',
+    cancelText: 'Batal',
+    danger: isReject,
+  });
+  if (!ok) return;
+
   setSaving(true);
   try {
-      await requestApi.update(request.id,{status, priority,assignedTo,itNotes});
+    await requestApi.update(request.id, { status, priority, assignedTo, itNotes });
 
-      setSaved(true)
-      setTimeout(() => {
-        setSaved(false);
-        window.location.reload()
-      }, 1000);
-  } catch {
-    alert('Gagal menyimpan data');
+    setSaved(true);
+    setTimeout(() => setSaved(false), 1500);
+
+    dialog.success('Perubahan request berhasil disimpan.', 'Berhasil Disimpan');
+    router.refresh();
+  } catch (err) {
+    dialog.error(
+      err instanceof Error ? err.message : 'Gagal menyimpan perubahan.',
+      'Gagal Menyimpan',
+    );
   } finally {
     setSaving(false);
   }

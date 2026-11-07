@@ -1,7 +1,11 @@
 import { Employee } from '@/types';
-import { redirect } from 'next/navigation';
 
-const API_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080').replace(/\/+$/, '');
+const PUBLIC_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080').replace(/\/+$/, '');
+
+const SERVER_URL = (process.env.API_INTERNAL_URL || PUBLIC_URL || 'http://localhost:8080').replace(/\/+$/, '');
+
+export const API_URL = typeof window === 'undefined' ? SERVER_URL : PUBLIC_URL;
+
 
 let redirecting = false
 

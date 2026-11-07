@@ -2,35 +2,33 @@
 
 import Link from 'next/link';
 import { CheckCircle2, LayoutDashboard, Printer, FilePlus2 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 
-export default function SuccessPage(){
+function SuccessContent() {
   const searchParams = useSearchParams();
   const id = searchParams.get('id');
   const form = searchParams.get('form');
 
-  const [isAdminOrIT, setIsAdminOrIT] = useState(false)
+  const [isAdminOrIT, setIsAdminOrIT] = useState(false);
 
   useEffect(() => {
-    const useStr = localStorage.getItem('auth-user')
-    if(useStr){
-    try{
-      const user = JSON.parse(useStr);
-      const allowed = user.role === 'admin' ||
-                      user.role === 'itstaff' || 
-                      user.role === 'staff';
-      setIsAdminOrIT(allowed);
-    }catch {
-      setIsAdminOrIT(false)
+    const userStr = localStorage.getItem('auth-user');
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        const allowed =
+          user.role === 'admin' ||
+          user.role === 'itstaff' ||
+          user.role === 'staff';
+        setIsAdminOrIT(allowed);
+      } catch {
+        setIsAdminOrIT(false);
+      }
     }
-  }
-  
-}, []);
+  }, []);
 
-
-
-  return (
+   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
       <div className="max-w-md w-full bg-white rounded-2xl shadow-sm border border-slate-200 p-8 text-center">
 
@@ -77,5 +75,18 @@ export default function SuccessPage(){
         </div>
       </div>
     </div>
-  );
-}
+    );
+  }
+  export default function SuccessPage(){
+    return (
+      <Suspense
+      fallback={
+        <div className="min-h-screen bg-slate-50 flex items-center justify-center text-slate-400 text-sm">
+          Memuat...
+        </div>
+      }
+    >
+      <SuccessContent />
+    </Suspense>
+    )
+  }
