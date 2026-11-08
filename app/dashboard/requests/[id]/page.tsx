@@ -20,7 +20,7 @@ async function getCurrentRole(): Promise<string | null> {
     const payload = JSON.parse(
       Buffer.from(token.split('.')[1], 'base64url').toString('utf8')
     );
-    return payload.role ?? null; // ← sesuaikan nama claim role
+    return payload.role ?? null;
   } catch {
     return null;
   }

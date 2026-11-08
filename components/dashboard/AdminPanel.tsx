@@ -51,6 +51,8 @@ export default function AdminPanel({ request }: { request: ITRequest }) {
 
   const isITStaff = userRole === 'staff' || userRole === 'itstaff';
   const isAdmin = userRole === 'admin';
+  const isApproved = request.status === 'approved'
+  const isLockedForStaff = isITStaff && isApproved
   const canEdit = isITStaff || isAdmin;
 
   const handleSave = async () => {
@@ -94,6 +96,11 @@ export default function AdminPanel({ request }: { request: ITRequest }) {
 
   return (
     <div className="space-y-4">
+      {isLockedForStaff && (
+        <div className="px-3 py-2.5 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800">
+            Request ini sudah <b>Approved</b> dan tidak bisa diubah lagi. Hubungi admin jika perlu perubahan.
+        </div>
+      )}
       <div className="flex gap-3 flex-wrap">
         <StatusBadge status={status} />
         <PriorityBadge priority={priority} />

@@ -2,6 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+:root{
+  --itr-font: 9pt;
+  --itr-desc: 10pt;    
+  --itr-title: 18pt;      
+  --itr-subtitle: 13pt;
+}
+
 @layer base {
   * { box-sizing: border-box; }
   body {
@@ -46,13 +53,14 @@
       padding-left: 0 !important;
       width: 100% !important;
       max-width: 100% !important;
-      .bg-slate-50,
-      .bg-gray-50,
-      .bg-slate-100,
-      [class*="bg-slate"],
-      [class*="bg-gray"] {
-      background: white !important;
     }
+
+    .bg-slate-50,
+    .bg-gray-50,
+    .bg-slate-100,
+    [class*="bg-slate"],
+    [class*="bg-gray"] {
+    background: white !important;
 
     /* Print area full width */
     #print-area {
@@ -63,31 +71,29 @@
       background: white !important;
     }
 
-    /* Override font khusus saat print — Additional Desc & Justification kecil */
-    /* Override SEMUA font di print area — termasuk div dan span */
     #print-area td,
     #print-area th,
     #print-area div,
     #print-area span,
     #print-area p {
-      font-size: 10pt !important;
+      font-size: var(--itr-font) !important;
     }
 
     #print-area .print-title { 
-      font-size: 20pt !important; 
+      font-size: var(--itr-title) !important; 
     }
     #print-area .print-subtitle { 
-      font-size: 15pt !important; 
+      font-size: var(--itr-subtitle) !important; 
     }
 
     #print-area .desc-section-just {
-      font-size: 9pt !important;
+      font-size: var(--itr-desc) !important;
       height: 150px;
       line-height: 1.2;
     }
     
     #print-area .desc-section span {
-      font-size: 12pt !important;
+      font-size: var(--itr-font) !important;
     }
   }
 }

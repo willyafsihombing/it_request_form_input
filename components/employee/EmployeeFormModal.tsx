@@ -70,7 +70,6 @@ export default function EmployeeFormModal({ employee, departments, onClose, onSa
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4"
-      onClick={onClose}
     >
       <div
         className="w-full max-w-lg bg-white rounded-2xl shadow-xl border border-slate-200"
