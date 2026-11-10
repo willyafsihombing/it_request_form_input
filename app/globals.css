@@ -62,7 +62,6 @@
     [class*="bg-gray"] {
     background: white !important;
 
-    /* Print area full width */
     #print-area {
       width: 100% !important;
       margin: 0 !important;

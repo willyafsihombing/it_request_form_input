@@ -168,7 +168,7 @@ export default function AdminPanel({ request }: { request: ITRequest }) {
           />
         </div> */}
 
-      {canEdit && (
+      {isLockedForStaff && itNotes && (
       <div>
         <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
           <MessageSquare size={11} className="inline mr-1" />Catatan IT
