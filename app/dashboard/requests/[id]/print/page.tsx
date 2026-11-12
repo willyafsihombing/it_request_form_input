@@ -6,21 +6,17 @@ import { API_URL } from '@/lib/api';
 
 export const dynamic = 'force-dynamic';
 
-// ===== UKURAN HURUF =====
-// Berlaku sama di layar dan saat print (tampilan layar = hasil cetak).
 const FONT_SCALE = 0.93;
 const fs = (px: number) => Math.round(px * FONT_SCALE * 100) / 100;
 
-// ===== KERTAS (A4 landscape) =====
 const PAPER_W = '297mm';
 const PAPER_H = '210mm';
-const PAPER_PAD = '5mm 6mm'; // jarak formulir dari tepi kertas
+const PAPER_PAD = '5mm 6mm'; 
 
-// ===== GARIS =====
-// Satu ketebalan & warna untuk semua garis agar sambungan presisi di layar dan saat print.
+
 const LINE = '1px solid #555';
-const LINE_BOLD = '2px solid #333'; // garis atas & bawah baris header
-const OVERLAP = '-1px';             // tumpuk garis antar tabel tepat 1 garis
+const LINE_BOLD = '2px solid #333'; 
+const OVERLAP = '-1px';             
 
 const FS = {
   base:      12,
@@ -221,17 +217,14 @@ export default async function PrintPage({ params } : { params: Promise<{ id: str
 
           <table style={{ width: '100%', tableLayout: 'fixed' }}>
             <colgroup>
-              {/* Kiri: Requester / Recipient = 10 + 5 + 5 + 6 + 6 = 32% */}
               <col style={{ width: '10%' }} />
               <col style={{ width: '5%' }} /><col style={{ width: '5%' }} />
               <col style={{ width: '6%' }} /><col style={{ width: '6%' }} />
 
-              {/* Tengah: System & Network / ERP */}
               <col style={{ width: '4.2%' }} /><col style={{ width: '4.2%' }} />
               <col style={{ width: '4.2%' }} /><col style={{ width: '4.2%' }} />
               <col style={{ width: '4.6%' }} /><col style={{ width: '4.6%' }} /><col style={{ width: '4.6%' }} />
 
-              {/* Kanan: Hardware & Software */}
               <col style={{ width: '3.8%' }} /><col style={{ width: '3.8%' }} />
               <col style={{ width: '3.8%' }} /><col style={{ width: '3.8%' }} /><col style={{ width: '3.8%' }} />
               <col style={{ width: '4.8%' }} /><col style={{ width: '4.8%' }} /><col style={{ width: '4.8%' }} />

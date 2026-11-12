@@ -28,7 +28,7 @@ const INIT = {
   erpPositionId: '', erpDistrict: '', erpRef: '', erpSignOnId: '', erpGlobalProfile: '',
   additionalDesc: '', costCode: '', justification: '', techComment: '',
   techAD: false, techAW: false, techCR: false, techEM: false, techIP: false, techEP: false,
-  sigRequester: '', sigSptDept: '', sigDeptMgr: '', sigSrMgr: '', sigHOO: '', sigITAdmin: 'HENDRIK ADELMEI', sigMSDIMgr: 'ADE WAHYUDIN',
+  sigRequester: '', sigSptDept: '', sigDeptMgr: '', sigSrMgr: '', sigHOO: 'M SYAH IRAN', sigITAdmin: 'HENDRIK ADELMEI', sigMSDIMgr: 'ADE WAHYUDIN',
   priority: 'normal',
 };
 
@@ -208,7 +208,7 @@ export default function ITRequestForm({mode = 'create', requestId, initial}: Pro
             onChange={e => u('requestTitle', e.target.value)}
             maxLength={50}
             className={inpRequired(data.requestTitle)}
-            placeholder="Contoh : Permintaan laptop baru"
+            placeholder="Judul Max 50 Karakter"
          />
       </Row>
 
@@ -335,7 +335,7 @@ export default function ITRequestForm({mode = 'create', requestId, initial}: Pro
         u('additionalDesc', limited)
       }} 
         rows={6} className={ta}
-        placeholder="Describe the Software / Hardware / Service / Privilege requested..." />
+        placeholder=" Maksimal 9 Baris" />
       <div className="mt-3">
         <Row label="Cost Code / COA">
           <input value={data.costCode} onChange={e => u('costCode', e.target.value)} className={inp} />
@@ -345,14 +345,14 @@ export default function ITRequestForm({mode = 'create', requestId, initial}: Pro
       <Sec icon="✅" title="Justification" bg="bg-green-50" color="text-green-800" />
       <textarea value={data.justification} onChange={e => u('justification', e.target.value)}
         rows={3} className={ta}
-        placeholder="Describe the business reason for your request..." />
+        placeholder="CONTOH : KEBUTUHAN UNTUK PEKERJAAN OPERASIONAL" />
 
       <Sec icon="✍️" title="Signatures" bg="bg-slate-100" />
       <div className={grid2}>
         <Row label="Requester / Date"><input value={data.sigRequester} onChange={e => u('sigRequester', e.target.value)} disabled className={inp + ' cursor-not-allowed opacity-60' } /></Row>
         <Row label="Sr. Mgr / Date"><input value={data.sigSrMgr} onChange={e => u('sigSrMgr', e.target.value.toUpperCase())} className={inp} /></Row>
         <Row label="Spt. Dept. / Date"><input value={data.sigSptDept} onChange={e => u('sigSptDept', e.target.value.toUpperCase())} className={inp} /></Row>
-        <Row label="HOO / Date"><input value={data.sigHOO} onChange={e => u('sigHOO', e.target.value.toUpperCase())} className={inp} /></Row>
+        <Row label="HOO / Date"><input value={data.sigHOO} disabled onChange={e => u('sigHOO', e.target.value.toUpperCase())} className={inp + ' cursor-not-allowed opacity-60'} /></Row>
         <Row label="Dept. Mgr / Date"><input value={data.sigDeptMgr} onChange={e => u('sigDeptMgr', e.target.value.toUpperCase())} className={inp} /></Row>
         <Row label="IT Admin / Date"><input value={data.sigITAdmin} disabled className={inp + ' cursor-not-allowed opacity-60'} /></Row>
         <Row label="MSDI Mgr / Date"><input value={data.sigMSDIMgr} disabled className={inp + ' cursor-not-allowed opacity-60'} /></Row>
