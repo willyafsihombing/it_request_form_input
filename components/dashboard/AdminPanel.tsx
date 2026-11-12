@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Save, Loader2, UserCheck, MessageSquare, Zap } from 'lucide-react';
+import { Save, Loader2, MessageSquare, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { StatusBadge, PriorityBadge } from '@/components/ui/badges';
 import type { RequestStatus, RequestPriority, ITRequest } from '@/types';
@@ -29,7 +29,7 @@ export default function AdminPanel({ request }: { request: ITRequest }) {
   const dialog = useDialog();
   const [status,     setStatus]     = useState<RequestStatus>(request.status);
   const [priority,   setPriority]   = useState<RequestPriority>(request.priority);
-  const [assignedTo, setAssignedTo] = useState(request.assignedTo || '');
+  // const [assignedTo, setAssignedTo] = useState(request.assignedTo || '');
   const [itNotes,    setItNotes]    = useState(request.itNotes    || '');
   const [saving,     setSaving]     = useState(false);
   const [saved,      setSaved]      = useState(false);
@@ -77,7 +77,7 @@ export default function AdminPanel({ request }: { request: ITRequest }) {
 
   setSaving(true);
   try {
-    await requestApi.update(request.id, { status, priority, assignedTo, itNotes });
+    await requestApi.update(request.id, { status, priority, itNotes }); //assignedTo
 
     setSaved(true);
     setTimeout(() => setSaved(false), 1500);
@@ -168,11 +168,12 @@ export default function AdminPanel({ request }: { request: ITRequest }) {
           />
         </div> */}
 
-      {isLockedForStaff && itNotes && (
+      
       <div>
         <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
           <MessageSquare size={11} className="inline mr-1" />Catatan IT
         </label>
+        {canEdit ? (
         <textarea
           value={itNotes}
           onChange={e => setItNotes(e.target.value)}
@@ -180,9 +181,12 @@ export default function AdminPanel({ request }: { request: ITRequest }) {
           rows={4}
           className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-400 bg-white resize-none"
         />
+        ) : (
+          <p className="px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg whitespace-pre-line text-slate-700 min-h-[2.5rem]">
+              {itNotes || <span className="text-slate-400">Tidak ada catatan.</span>}
+            </p>
+          )}
       </div>
-      )}
-
       {canEdit && (
         <button
           onClick={handleSave}
