@@ -17,7 +17,7 @@ export default function StatsCard({ title, value, icon: Icon, color, bgColor, bo
       <div className="flex items-start justify-between">
         <div>
           <p className="text-slate-500 text-sm font-medium">{title}</p>
-          <p className={cn('text-3xl font-bold mt-1', color)}>{value}</p>
+          <p className={cn('text-2xl font-bold mt-1', color)}>{value}</p>
           {trend && <p className="text-xs text-slate-400 mt-1">{trend}</p>}
         </div>
         <div className={cn('w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0', bgColor)}>

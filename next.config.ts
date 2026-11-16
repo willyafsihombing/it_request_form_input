@@ -2,17 +2,9 @@ import path from 'path';
 import type { NextConfig } from 'next';
 
 
-
-// const nextConfig: NextConfig = {
-//     output: 'standalone',
-//     turbopack: {
-//         root: path.resolve(__dirname),
-//     },
-// };
-
 const nextConfig: NextConfig = {
     output: 'standalone',
-    allowedDevOrigins: ['127.0.0.1'],
+    allowedDevOrigins: ['127.0.0.1', 'host.docker.internal'],
     turbopack: {
         root: path.resolve(__dirname),
     },

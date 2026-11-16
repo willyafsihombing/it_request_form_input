@@ -7,7 +7,7 @@ import { Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { requestApi } from '@/lib/api'; 
 import { employeeApi } from '@/lib/employee-api';
-import EmployeeAutocomplete from '@/components/employee/EmployeeAutocomplete';
+import EmployeeAutocomplete from '@/features/employee/EmployeeAutocomplete';
 import { recipientFromEmployee, clearedRecipient } from '@/lib/employee-mapping';
 
 

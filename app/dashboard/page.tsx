@@ -8,7 +8,7 @@
   } from 'lucide-react';
   import { formatDate, timeAgo, STATUS_CONFIG } from '@/lib/utils';
   import { StatusBadge, PriorityBadge } from '@/components/ui/badges';
-  import StatsCard from '@/components/dashboard/StatsCard';
+  import StatsCard from '@/features/dashboard/StatsCard';
   import { requestApi, statsApi } from '@/lib/api';
   import type { RequestStatus, RequestPriority } from '@/types';
 

@@ -15,6 +15,7 @@ import {
   Search,
   Trash2,
   Upload,
+  User,
   UserCheck,
   UserPlus,
   UserX,
@@ -24,7 +25,7 @@ import { employeeApi, type Employee, type EmployeeStats } from '@/lib/employee-a
 import EmployeeFormModal from './EmployeeFormModal';
 import EmployeeImportModal from './EmployeeImportModal';
 import EmployeeAccountModal from './EmployeeAccountModal';
-import { useDialog } from '../ui/DiaologProvider';
+import { useDialog } from '../../components/ui/DiaologProvider';
 
 const PER_PAGE_OPTIONS = [10, 25, 50, 100, 200];
 
@@ -125,13 +126,15 @@ function StatCard({
 }) {
   return (
     <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 flex items-center gap-4">
-      <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white ${tone}`}>
+      <div>
+      <div className={`w-9 h-9 shrink-0 rounded-full flex items-center justify-center text-white ${tone}`}>
         {icon}
       </div>
-      <div>
-        <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">{label}</p>
-        <p className="text-2xl font-bold text-slate-800">{value}</p>
+      <div className='min-w-0'>
+        <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">{label}</p>
+        <p className="text-lg font-bold text-slate-800">{value}</p>
       </div>
+    </div>
     </div>
   );
 }
@@ -201,7 +204,6 @@ function Pagination({
   );
 }
 
-// ── Komponen utama ───────────────────────────────────────────────────────────
 
 export default function EmployeeList() {
   const dialog = useDialog()
@@ -457,7 +459,10 @@ export default function EmployeeList() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
+      <div
+        className="mb-6"
+        style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 16 }}
+      >
         <StatCard
           label="Total Karyawan"
           value={num(stats?.total)}
@@ -467,14 +472,14 @@ export default function EmployeeList() {
         <StatCard
           label="Aktif"
           value={num(stats?.active)}
-          tone="bg-green-500"
+          tone="bg-green-600"
           icon={<UserCheck size={20} />}
         />
         <StatCard
           label="Nonaktif"
           value={num(stats?.inactive)}
-          tone="bg-red-500"
-          icon={<UserX size={20} />}
+          tone="bg-red-600"
+          icon={<User size={20} />}
         />
         <StatCard
           label="Staff / Non Staff"

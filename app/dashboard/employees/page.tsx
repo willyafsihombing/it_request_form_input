@@ -1,4 +1,4 @@
-import EmployeeList from "@/components/employee/EmployeeList";
+import EmployeeList from "@/features/employee/EmployeeList";
 
 export const metadata = {
   title: "Data Karyawan",

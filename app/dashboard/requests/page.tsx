@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { FilePlus2 } from 'lucide-react';
-import RequestsTable from '@/components/dashboard/RequestsTable';
+import RequestsTable from '@/features/itrequest/components/RequestsTable';
 
 export default function RequestsPage() {
   return (

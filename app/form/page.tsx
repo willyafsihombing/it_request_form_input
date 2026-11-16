@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
-import ITRequestForm from '@/components/form/ITRequestForm';
+import ITRequestForm from '@/features/itrequest/components/ITRequestForm';
 
 export default function FormPage() {
   return (

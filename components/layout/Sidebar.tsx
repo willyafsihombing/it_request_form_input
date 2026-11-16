@@ -9,7 +9,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import LogoutButton from '@/components/layout/logoutButton';
+import LogoutButton from '@/features/auth/components/logoutButton';
 import { useEffect, useState } from 'react';
 
 type NavItem = {

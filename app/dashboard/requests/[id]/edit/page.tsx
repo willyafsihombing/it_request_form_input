@@ -3,7 +3,7 @@ import { notFound, redirect } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { requestApi } from '@/lib/api';
-import ITRequestForm from '@/components/form/ITRequestForm';
+import ITRequestForm from '@/features/itrequest/components/ITRequestForm';
 import type { ITRequest } from '@/types';
 
 export const dynamic = 'force-dynamic';
