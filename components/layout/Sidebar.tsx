@@ -23,6 +23,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: '/dashboard',           label: 'Dashboard',            icon: LayoutDashboard },
   { href: '/dashboard/employees', label: 'Master Data Karyawan', icon: Users, adminOnly: true },
   { href: '/dashboard/requests',  label: 'IT Requests',          icon: ClipboardList   },
+  { href: '/dashboard/approval-routes', label: 'Alur Persetujuan', icon: Settings, adminOnly: true },
   // { href: '/form',               label: 'Buat Request',    icon: FilePlus2       }, -> buat request sementara di hilangkan dahulu
 ];
 

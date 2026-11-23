@@ -21,6 +21,9 @@ interface RequestRow {
   priority: RequestPriority;
   assignedTo: string;
   createdAt: string;
+  createdByUserId?: string;
+  approvalStatus?: string;
+  isOwner?: boolean;
 }
 
 export default function RequestsTable() {
@@ -38,7 +41,7 @@ export default function RequestsTable() {
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; formNumber: string } | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false)
   const [successMessage, setSuccessMessage] = useState('')
-  const [currentUser, setCurrentUser] = useState <{ role: string, fullName:string} | null>(null);
+  const [currentUser, setCurrentUser] = useState<{ id: string; role: string; fullName: string } | null>(null);
   const [userLoaded, setUserLoaded] = useState(false)
   
     useEffect(() => {
@@ -55,6 +58,9 @@ export default function RequestsTable() {
     },[]);
 
   const isAdminOrIT = currentUser?.role === 'admin' || currentUser?.role === 'itstaff' || currentUser?.role === 'staff'
+    
+  const canModify = (req: RequestRow) =>
+  isAdminOrIT || !!req.isOwner;
 
   const fetchRequests = useCallback(async () => {
     if (!userLoaded) return;
@@ -66,7 +72,6 @@ export default function RequestsTable() {
       limit: 15,
       status: status !== 'all' ? status : undefined,
       priority:priority !== 'all' ? priority : undefined,
-      search: search || undefined,
       reqName: !isAdminOrIT && currentUser?.fullName ? currentUser.fullName : undefined,
     }) as any;
       
@@ -79,19 +84,19 @@ export default function RequestsTable() {
     } finally {
       setLoading (false)
     }
-  }, [page, status, priority, search, currentUser, isAdminOrIT, userLoaded]);
+  }, [page, status, priority, search, userLoaded]);
 
   useEffect(() => { fetchRequests(); }, [fetchRequests]);
   useEffect(() => { setPage(1); }, [search, status, priority]);
     
   const handleDeleteClick = (id: string, formNumber: string) => {
-  setDeleteTarget({ id, formNumber });
+  setDeleteTarget({ id, formNumber });  
   setShowModal(true);
 };
 
  const handleDeleteConfirm = async () => {
     if (!deleteTarget) return;
-    setLoading(true);
+    setDeleteLoading(true);
     try {
       await requestApi.delete(deleteTarget.id);
       setShowModal(false);
@@ -225,7 +230,7 @@ export default function RequestsTable() {
                       >
                         <Eye size={15} />
                       </Link>
-                      {(req.status === 'approved' || isAdminOrIT) ? (
+                      {canModify(req) && (req.status === 'approved' || isAdminOrIT) ? (
                       <Link
                         href={`/dashboard/requests/${req.id}/print`}
                         target="_blank"
@@ -235,20 +240,30 @@ export default function RequestsTable() {
                         <Printer size={15} />
                       </Link>
                       ) : (
-                        <span className="p-1.5 rounded-lg text-slate-200 cursor-not-allowed" 
-                        title="Print hanya tersedia setelah request di approve oleh IT"
+                        <span className="p-1.5 rounded-lg text-slate-200 cursor-not-allowed"
+                        title={canModify(req)
+                          ? 'Cetak tersedia setelah request disetujui'
+                          : 'Hanya pembuat request atau IT yang dapat mencetak'}
                         >
                         <Printer size={15} />
                         </span>
                       )}
-                      
-                      <button
-                        onClick={() => handleDeleteClick(req.id, req.formNumber)}
-                        className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors"
-                        title="Hapus"
-                      >
-                        <Trash2 size={15} />
-                      </button>
+                      {canModify(req) && (
+                        req.approvalStatus === 'in_review' ? (
+                          <span className="p-1.5 rounded-lg text-slate-200 cursor-not-allowed"
+                            title="Sedang dalam proses persetujuan, tidak bisa dihapus">
+                            <Trash2 size={15} />
+                          </span>
+                        ) : (
+                          <button
+                            onClick={() => handleDeleteClick(req.id, req.formNumber)}
+                            className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                            title="Hapus"
+                          >
+                            <Trash2 size={15} />
+                          </button>
+                        )
+                      )}
                     </div>
                   </td>
                 </tr>

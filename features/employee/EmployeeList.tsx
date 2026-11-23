@@ -24,7 +24,7 @@ import {
 import { employeeApi, type Employee, type EmployeeStats } from '@/lib/employee-api';
 import EmployeeFormModal from './EmployeeFormModal';
 import EmployeeImportModal from './EmployeeImportModal';
-import EmployeeAccountModal from './EmployeeAccountModal';
+import EmployeeAccountModal from '../account/components/EmployeeAccountModal';
 import { useDialog } from '../../components/ui/DiaologProvider';
 
 const PER_PAGE_OPTIONS = [10, 25, 50, 100, 200];
@@ -374,13 +374,6 @@ export default function EmployeeList() {
       <div className="flex items-start justify-between flex-wrap gap-3 mb-6">
         <div>
           <h1 className="text-xl font-bold text-slate-800">Master Karyawan</h1>
-          {/* <nav className="flex items-center gap-1.5 text-xs text-slate-500 mt-1">
-            <Home size={12} />
-            <ChevronRight size={12} />
-            <span>Karyawan</span>
-            <ChevronRight size={12} />
-            <span className="text-slate-800 font-medium">Daftar Karyawan</span>
-          </nav> */}
         </div>
         <div className="flex items-center gap-2">
           <div className="flex items-center p-1 bg-white border border-slate-200 rounded-xl">
@@ -424,15 +417,15 @@ export default function EmployeeList() {
             )} */}
           </div>
 
-          {canManage && (
+          {/* {canManage && (
             <button
               type="button"
               onClick={() => setImportOpen(true)}
               className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 text-sm font-semibold rounded-xl hover:bg-slate-50"
-            >
-              <Upload size={14} /> Import Excel
+            >Import Exce
+              <Upload size={14} /> l
             </button>
-          )}
+          )} */}
 
           {canManage && (
             <button

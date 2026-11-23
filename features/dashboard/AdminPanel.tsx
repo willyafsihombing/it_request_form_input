@@ -8,6 +8,7 @@ import { StatusBadge, PriorityBadge } from '@/components/ui/badges';
 import type { RequestStatus, RequestPriority, ITRequest } from '@/types';
 import { requestApi } from '@/lib/api';
 import { useDialog } from '@/components/ui/DiaologProvider';
+import ApprovalProgress from '@/features/approval/ApprovalProgress';  
 
 const STATUS_OPTIONS: { value: RequestStatus; label: string }[] = [
   { value: 'pending',   label: 'Pending'   },
@@ -29,7 +30,6 @@ export default function AdminPanel({ request }: { request: ITRequest }) {
   const dialog = useDialog();
   const [status,     setStatus]     = useState<RequestStatus>(request.status);
   const [priority,   setPriority]   = useState<RequestPriority>(request.priority);
-  // const [assignedTo, setAssignedTo] = useState(request.assignedTo || '');
   const [itNotes,    setItNotes]    = useState(request.itNotes    || '');
   const [saving,     setSaving]     = useState(false);
   const [saved,      setSaved]      = useState(false);
@@ -46,24 +46,24 @@ export default function AdminPanel({ request }: { request: ITRequest }) {
       setUserRole('')
     }
   }
-  // console.log(useStr)
 }, []);
 
   const isITStaff = userRole === 'staff' || userRole === 'itstaff';
   const isAdmin = userRole === 'admin';
   const isApproved = request.status === 'approved'
+  const usesApproval = !!request.approvalStatus
   const isLockedForStaff = isITStaff && isApproved
   const canEdit = isITStaff || isAdmin;
 
   const handleSave = async () => {
   if (!canEdit) return;
 
-  if (status === 'rejected' && !itNotes.trim()) {
+  if (!usesApproval && status === 'rejected' && !itNotes.trim()) {
     dialog.error('Isi Catatan IT sebagai alasan penolakan.', 'Catatan Wajib Diisi');
     return;
   }
 
-  const isReject = status === 'rejected';
+  const isReject = !usesApproval && status === 'rejected';
   const ok = await dialog.confirm({
     title: isReject ? 'Tolak Request?' : 'Simpan Perubahan?',
     message: isReject
@@ -77,7 +77,10 @@ export default function AdminPanel({ request }: { request: ITRequest }) {
 
   setSaving(true);
   try {
-    await requestApi.update(request.id, { status, priority, itNotes }); //assignedTo
+    await requestApi.update(
+      request.id,
+      usesApproval ? { priority, itNotes } : { status, priority, itNotes }, //assignedTo
+    );
 
     setSaved(true);
     setTimeout(() => setSaved(false), 1500);
@@ -102,10 +105,22 @@ export default function AdminPanel({ request }: { request: ITRequest }) {
         </div>
       )}
       <div className="flex gap-3 flex-wrap">
-        <StatusBadge status={status} />
+        {usesApproval && request.approvalStatus === 'in_review' ? (
+          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+            Waiting
+          </span>
+        ) : (
+          <StatusBadge status={status} />
+        )}
         <PriorityBadge priority={priority} />
       </div>
 
+       {usesApproval ? (
+        <div className="space-y-2">
+          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Alur Persetujuan</p>
+          <ApprovalProgress requestId={request.id} />
+        </div>
+      ) : (
       <div>
         <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
           <Zap size={11} className="inline mr-1" />Status
@@ -129,8 +144,9 @@ export default function AdminPanel({ request }: { request: ITRequest }) {
           ))}
         </div>
       </div>
+      )}
 
-      <div>
+      {/* <div>
         <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
           Prioritas
         </label>
@@ -152,7 +168,7 @@ export default function AdminPanel({ request }: { request: ITRequest }) {
             </button>
           ))}
         </div>
-      </div>
+      </div> */}
 
       {/* Assigned To */}
         {/* <div>
@@ -169,7 +185,7 @@ export default function AdminPanel({ request }: { request: ITRequest }) {
         </div> */}
 
       
-      <div>
+      {/* <div>
         <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
           <MessageSquare size={11} className="inline mr-1" />Catatan IT
         </label>
@@ -186,8 +202,8 @@ export default function AdminPanel({ request }: { request: ITRequest }) {
               {itNotes || <span className="text-slate-400">Tidak ada catatan.</span>}
             </p>
           )}
-      </div>
-      {canEdit && (
+      </div> */}
+      {/* {canEdit && (
         <button
           onClick={handleSave}
           disabled={saving}
@@ -206,7 +222,7 @@ export default function AdminPanel({ request }: { request: ITRequest }) {
             <><Save size={15} /> Simpan Perubahan</>
           )}
         </button>
-        )}
+        )} */}
     </div>
   );
 }

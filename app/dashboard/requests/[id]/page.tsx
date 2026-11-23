@@ -9,6 +9,7 @@ import ResubmitButton from '@/features/itrequest/components/ResubmitButton';
 import type { ITRequest, RequestStatus, RequestPriority } from '@/types';
 import { requestApi } from '@/lib/api';
 import { cookies } from 'next/headers';
+import ApprovalProgress from '@/features/approval/ApprovalProgress';
 
 export const dynamic = 'force-dynamic';
 

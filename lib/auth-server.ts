@@ -3,7 +3,7 @@ import { cookies } from 'next/headers';
 type SessionUser = { id?: string; role?: string };
 
 export async function getCurrentUser(): Promise<SessionUser | null> {
-  const token = (await cookies()).get('token')?.value; // ← sesuaikan nama cookie
+  const token = (await cookies()).get('token')?.value;
   if (!token) return null;
 
   try {

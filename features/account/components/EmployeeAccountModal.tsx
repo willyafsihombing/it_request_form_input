@@ -32,6 +32,13 @@ const STATUS_LABEL: Record<AccountResult['status'], string> = {
   failed: 'Gagal',
 };
 
+const SIZE = {
+  sm: 'max-w-md',
+  md: 'max-w-xl',   
+  lg: 'max-w-3xl',  
+} as const;
+
+
 function Tile({ label, value, tone }: { label: string; value: number; tone: string }) {
   return (
     <div className="rounded-xl border border-slate-200 p-3 text-center">
@@ -165,13 +172,15 @@ export default function EmployeeAccountModal({ mode, ids, departemen, onClose, o
 
   const title = mode === 'reset' ? 'Reset Password' : 'Buat Akun dari Data Karyawan';
 
+  const size = phase === "done" ? "lg" : mode === "reset" ? "sm" : "md"
+
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 sm:p4"
       onClick={close}
     >
       <div
-        className="w-full max-w-3xl bg-white rounded-2xl shadow-xl border border-slate-200"
+        className={`w-full ${SIZE[size]} max-h-[calc(100vh-1rem)] overflow-y-auto bg-white rounded-2xl shadow-xl border border-slate-200`}
         onClick={e => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">

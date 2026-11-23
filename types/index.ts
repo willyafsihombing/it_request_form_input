@@ -69,6 +69,11 @@ export interface ITRequest {
   priority: RequestPriority;
   itNotes: string;
   assignedTo: string;
+  createdByUserId?: string;
+
+  approvalStatus?: '' | 'in_review' | 'approved' | 'rejected';
+  currentStep?: number;
+  approvalRound?: number;
 
   createdAt: string | Date;
   updatedAt: string | Date;
