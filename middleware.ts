@@ -22,7 +22,12 @@ export function middleware(req: NextRequest) {
   const isPublic = publicRoutes.some(r => pathname.startsWith(r)) || isPrintRoute;
 
   if (!token && !isPublic) {
-    const res = NextResponse.redirect(new URL('/login?expired=1', req.url));
+    const loginUrl = new URL('/login', req.url);
+    if (rawToken) loginUrl.searchParams.set('expired', '1'); // hanya bila sesi benar-benar habis
+    if (pathname !== '/' && pathname !== '/dashboard') {
+      loginUrl.searchParams.set('next', pathname + req.nextUrl.search);
+    }
+    const res = NextResponse.redirect(loginUrl);
     res.cookies.delete('auth-token');
     return res;
   }
@@ -33,8 +38,10 @@ export function middleware(req: NextRequest) {
     return res;
   }
 
-  if (token && pathname === '/login' && !searchParams.has('expired')) {
-    return NextResponse.redirect(new URL('/dashboard', req.url));
+   if (token && pathname === '/login' && !searchParams.has('expired')) {
+    const next = searchParams.get('next');
+    const dest = next && next.startsWith('/') && !next.startsWith('//') ? next : '/dashboard';
+    return NextResponse.redirect(new URL(dest, req.url));
   }
 
   return NextResponse.next();

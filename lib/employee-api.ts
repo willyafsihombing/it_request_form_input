@@ -193,11 +193,14 @@ export const employeeApi = {
   },
 
   accountStatus(ids: string[]) {
-    return request<{accounts: Record<string, string> }>('/api/employees/accounts/status', {
+  return request<{ accounts: Record<string, string>; emails?: Record<string, string> }>(
+    '/api/employees/accounts/status',
+    {
       method: 'POST',
-      body: JSON.stringify({ids}),
-    });
-  },
+      body: JSON.stringify({ ids }),
+    },
+  );
+},
 
   pendingAccounts(departemen: string){
     const qs = new URLSearchParams();

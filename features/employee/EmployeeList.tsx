@@ -235,6 +235,8 @@ export default function EmployeeList() {
   const [accountModal, setAccountModal] = useState <{ mode : 'create' | 'reset'; ids?: string[]} | null>(null);
   const requestId = useRef(0);
   const canManage = role === 'admin';
+  const [emails, setEmails] = useState<Record<string, string>>({});
+
 
   
 
@@ -299,13 +301,16 @@ export default function EmployeeList() {
     useEffect(() => {
       if (!canManage || items.length === 0) {
         setAccounts({})
+        setEmails({})
         return;
       }
     let cancelled = false;
     employeeApi
     .accountStatus(items.map(e => e.id))
     .then(r => {
-      if (!cancelled) setAccounts(r.accounts ?? {})
+      if (!cancelled) 
+        setAccounts(r.accounts ?? {});
+        setEmails (r.emails ?? {})
     })
     .catch(err => {
       console.log('accountsStatus gagal:', err)

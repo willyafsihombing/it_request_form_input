@@ -1,4 +1,3 @@
-// app/dashboard/requests/[id]/page.tsx
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Printer, ExternalLink, Pencil } from 'lucide-react';
@@ -9,7 +8,7 @@ import ResubmitButton from '@/features/itrequest/components/ResubmitButton';
 import type { ITRequest, RequestStatus, RequestPriority } from '@/types';
 import { requestApi } from '@/lib/api';
 import { cookies } from 'next/headers';
-import ApprovalProgress from '@/features/approval/ApprovalProgress';
+
 
 export const dynamic = 'force-dynamic';
 
@@ -253,7 +252,7 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
 
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
             <h3 className="text-sm font-semibold text-slate-700 mb-4 flex items-center gap-2">
-              ⚙️ Admin Panel
+              ⚙️ Routing Approval
             </h3>
             <AdminPanel request={r} />
           </div>

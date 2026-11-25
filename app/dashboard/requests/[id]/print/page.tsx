@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import type { ITRequest } from '@/types';
 import PrintButtons from '@/app/dashboard/requests/[id]/print/printButton';
 import { API_URL } from '@/lib/api';
+import { SignaturesProvider, SigCell } from '@/features/approval/PrintSignatures';
 
 
 export const dynamic = 'force-dynamic';
@@ -53,8 +54,25 @@ function CBox({ on, label }: { on: boolean; label?: string }) {
 }
 
 
-export default async function PrintPage({ params } : { params: Promise<{ id: string }> }){
+export default async function PrintPage({ params, searchParams } : { params: Promise<{ id: string }>; searchParams: Promise<{pt?: string}> }){
   const { id } = await params
+  const { pt } = await searchParams
+
+  let initialSigs: Record<string, string> | undefined
+  if (pt) {
+    try {
+      const sres = await fetch(
+         `${API_URL}/api/requests/${id}/print-signatures?pt=${encodeURIComponent(pt)}`,
+        { cache: 'no-store' },
+      )
+       if (sres.ok) {
+        const j = await sres.json()
+        initialSigs = (j.data ?? j).signatures ?? {}
+      }
+    }catch (err) {
+      console.log("Fetch print signatures error", err)
+    }
+  }
 
   let r: ITRequest
   try{
@@ -447,67 +465,69 @@ export default async function PrintPage({ params } : { params: Promise<{ id: str
             </tbody>
           </table>
 
-          <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '-0.7px', backgroundColor:'#e4f2ff' }}>
-          <tbody>
-            <tr>
-              <td colSpan={6} style={{ border: '0.5px solid #555', padding: '2px 8px', background: CYAN, fontWeight: 'bold', fontFamily: 'Arial', fontSize: fs(11) }}>
-                Signature :
-              </td>
-            </tr>
+          <SignaturesProvider requestId={id} initial={initialSigs}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '-0.7px', backgroundColor:'#e4f2ff' }}>
+              <tbody>
+                <tr>
+                  <td colSpan={6} style={{ border: '0.5px solid #555', padding: '2px 8px', background: CYAN, fontWeight: 'bold', fontFamily: 'Arial', fontSize: fs(11) }}>
+                    Signature :
+                  </td>
+                </tr>
 
-            <tr>
-              <td style={{borderRight: '0.5px solid #555', borderLeft:'0.5px solid #555', padding: '6px 6px', width: '10%', fontFamily: 'Arial', fontSize: fs(10), whiteSpace: 'nowrap', height: 30 }}>
-                Requester / Date
-              </td>
-              <td style={{ border: '0.5px solid #555', padding: '6px 6px', width: '25%', fontFamily: 'Arial', fontSize: fs(11.5), height: 30 }}>
-                {r.sigRequester}
-              </td>
-              <td style={{ borderRight: '0.5px solid #555', borderLeft:'0.5px solid #555', padding: '6px 10px', width: '8%', fontFamily: 'Arial', fontSize: fs(10), whiteSpace: 'nowrap', height: 30 }}>
-                Sr. Mgr / Date
-              </td>
-              <td style={{ border: '0.5px solid #555', padding: '6px 6px', width: '25%', fontFamily: 'Arial', fontSize: fs(11.5), height: 30 }}>
-                {r.sigSrMgr}
-              </td>
-              <td style={{ borderRight: '0.5px solid #555', borderLeft:'0.5px solid #555', padding: '6px 10px', width: '8%', fontFamily: 'Arial', fontSize: fs(10), whiteSpace: 'nowrap', height: 30 }}>
-                IT Admin / Date
-              </td>
-              <td style={{ border: '0.5px solid #555', padding: '6px 6px', width: '25%', fontFamily: 'Arial', fontSize: fs(11.5), height: 30 }}>
-                {r.sigITAdmin}
-              </td>
-            </tr>
+                <tr>
+                  <td style={{ borderRight: '0.5px solid #555', borderLeft: '0.5px solid #555', padding: '6px 6px', width: '10%', fontFamily: 'Arial', fontSize: fs(10), whiteSpace: 'nowrap', height: 30 }}>
+                    Requester / Date
+                  </td>
+                  <td style={{ border: '0.5px solid #555', padding: '6px 6px', width: '25%', fontFamily: 'Arial', fontSize: fs(11.5), height: 30 }}>
+                    <SigCell code="requester" name={r.sigRequester} /> 
+                  </td>
+                  <td style={{ borderRight: '0.5px solid #555', borderLeft: '0.5px solid #555', padding: '6px 10px', width: '8%', fontFamily: 'Arial', fontSize: fs(10), whiteSpace: 'nowrap', height: 30 }}>
+                    Sr. Mgr / Date
+                  </td>
+                  <td style={{ border: '0.5px solid #1c1313', padding: '6px 6px', width: '25%', fontFamily: 'Arial', fontSize: fs(11.5), height: 30 }}>
+                    <SigCell code="sr_manager" name={r.sigSrMgr} />
+                  </td>
+                  <td style={{ borderRight: '0.5px solid #555', borderLeft: '0.5px solid #555', padding: '6px 10px', width: '8%', fontFamily: 'Arial', fontSize: fs(10), whiteSpace: 'nowrap', height: 30 }}>
+                    IT Admin / Date
+                  </td>
+                  <td style={{ border: '0.5px solid #555', padding: '6px 6px', width: '25%', fontFamily: 'Arial', fontSize: fs(11.5), height: 30 }}>
+                    <SigCell code="it_check" name={r.sigITAdmin} />
+                  </td>
+                </tr>
 
-            <tr>
-              <td style={{ borderRight: '0.5px solid #555', borderLeft:'0.5px solid #555', padding: '6px 6px', width: '10%', fontFamily: 'Arial', fontSize: fs(10), whiteSpace: 'nowrap', height: 30 }}>
-                Spt. Dept. / Date
-              </td>
-              <td style={{ border: '0.5px solid #555', padding: '6px 6px', width: '25%', fontFamily: 'Arial', fontSize: fs(11.5), height: 30 }}>
-                {r.sigSptDept}
-              </td>
-              <td style={{ borderRight: '0.5px solid #555', borderLeft:'0.5px solid #555', padding: '6px 10px', width: '8%', fontFamily: 'Arial', fontSize: fs(10), whiteSpace: 'nowrap', height: 30 }}>
-                HOO/ Date
-              </td>
-              <td style={{ border: '0.5px solid #555', padding: '6px 6px', width: '25%', fontFamily: 'Arial', fontSize: fs(11.5), height: 30 }}>
-                {r.sigHOO}
-              </td>
-              <td style={{ borderRight: '0.5px solid #555', borderLeft:'0.5px solid #555', padding: '6px 10px', width: '8%', fontFamily: 'Arial', fontSize: fs(10), whiteSpace: 'nowrap', height: 30 }}>
-                MSDI Mgr / Date
-              </td>
-              <td style={{ border: '0.5px solid #555', padding: '6px 6px', width: '25%', fontFamily: 'Arial', fontSize: fs(11.5), height: 30 }}>
-                {r.sigMSDIMgr}
-              </td>
-            </tr>
+                <tr>
+                  <td style={{ borderRight: '0.5px solid #555', borderLeft: '0.5px solid #555', padding: '6px 6px', width: '10%', fontFamily: 'Arial', fontSize: fs(10), whiteSpace: 'nowrap', height: 30 }}>
+                    Spt. Dept. / Date
+                  </td>
+                  <td style={{ border: '0.5px solid #555', padding: '6px 6px', width: '25%', fontFamily: 'Arial', fontSize: fs(11.5), height: 30 }}>
+                    <SigCell code="supt_dept" name={r.sigSptDept} />
+                  </td>
+                  <td style={{ borderRight: '0.5px solid #555', borderLeft: '0.5px solid #555', padding: '6px 10px', width: '8%', fontFamily: 'Arial', fontSize: fs(10), whiteSpace: 'nowrap', height: 30 }}>
+                    HOO/ Date
+                  </td>
+                  <td style={{ border: '0.5px solid #555', padding: '6px 6px', width: '25%', fontFamily: 'Arial', fontSize: fs(11.5), height: 30 }}>
+                    <SigCell code="hoo" name={r.sigHOO} />
+                  </td>
+                  <td style={{ borderRight: '0.5px solid #555', borderLeft: '0.5px solid #555', padding: '6px 10px', width: '8%', fontFamily: 'Arial', fontSize: fs(10), whiteSpace: 'nowrap', height: 30 }}>
+                    MSDI Mgr / Date
+                  </td>
+                  <td style={{ border: '0.5px solid #555', padding: '6px 6px', width: '25%', fontFamily: 'Arial', fontSize: fs(11.5), height: 30 }}>
+                    <SigCell code="it_manager" name={r.sigMSDIMgr} />
+                  </td>
+                </tr>
 
-            <tr>
-              <td style={{ borderRight: '0.5px solid #555', borderLeft:'0.5px solid #555', borderBottom:'0.5px solid #555', padding: '3px 6px', width: '8%', fontFamily: 'Arial', fontSize: fs(10), whiteSpace: 'nowrap', height: 30 }}>
-                Dept. Mgr / Date
-              </td>
-              <td style={{ border: '0.5px solid #555', padding: '3px 6px', width: '25%', fontFamily: 'Arial', fontSize: fs(11.5), height: 30 }}>
-                {r.sigDeptMgr}
-              </td>
-              <td colSpan={4} style={{ borderRight: '0.5px solid #555', borderLeft:'0.5px solid #555',borderBottom:'0.5px solid #555' }}></td>
-            </tr>
-          </tbody>
-        </table>
+                <tr>
+                  <td style={{ borderRight: '0.5px solid #555', borderLeft: '0.5px solid #555', borderBottom: '0.5px solid #555', padding: '3px 6px', width: '8%', fontFamily: 'Arial', fontSize: fs(10), whiteSpace: 'nowrap', height: 30 }}>
+                    Dept. Mgr / Date
+                  </td>
+                  <td style={{ border: '0.5px solid #555', padding: '3px 6px', width: '25%', fontFamily: 'Arial', fontSize: fs(11.5), height: 30 }}>
+                    <SigCell code="dept_manager" name={r.sigDeptMgr} />
+                  </td>
+                  <td colSpan={4} style={{ borderRight: '0.5px solid #555', borderLeft: '0.5px solid #555', borderBottom: '0.5px solid #555' }}></td>
+                </tr>
+              </tbody>
+            </table>
+          </SignaturesProvider>
         </div>
       </div>
     </div>

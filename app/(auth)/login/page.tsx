@@ -6,12 +6,11 @@ import { useRouter } from 'next/navigation';
 import { ClipboardList, Eye, EyeOff, Loader2, Lock, ShieldCheck, User, Users } from 'lucide-react';
 import { authApi } from '@/lib/api';
 
-// const FEATURES = [
-//   { icon: ClipboardList, title: 'IT Request', desc: 'Ajukan dan pantau permintaan IT dalam satu tempat.' },
-//   { icon: ClipboardList, title: '', desc: 'Ajukan dan pantau permintaan IT dalam satu tempat.' },
-//   { icon: Users, title: 'Data Karyawan', desc: 'Data penerima terisi otomatis dari master karyawan.' },
-//   { icon: ShieldCheck, title: 'Akses Aman', desc: 'Login berbasis NIK dengan hak akses sesuai peran.' },
-// ];
+
+function safeNext(): string {
+  const n = new URLSearchParams(window.location.search).get('next');
+  return n && n.startsWith('/') && !n.startsWith('//') ? n : '/dashboard';
+}
 
 export default function LoginPage() {
   const router = useRouter();
@@ -43,7 +42,7 @@ export default function LoginPage() {
       localStorage.setItem('auth-token', res.token);
       localStorage.setItem('auth-user', JSON.stringify(res.user));
 
-      router.push(res.user?.mustChangePassword ? '/change-password' : '/dashboard');
+      router.push(res.user?.mustChangePassword ? '/change-password' : safeNext());
       router.refresh();
     } catch (err: any) {
       setError(err.message || 'Login gagal');
@@ -71,8 +70,8 @@ export default function LoginPage() {
         />
 
         <div className="relative flex items-center">
-          <div className="w-20 h-20 rounded-2xl flex items-center justify-center p-2">
-            <img src="/img/nexora-rev1.png" alt="Nexora" className="w-full h-full object-contain" />
+          <div className="w-40 h-40 rounded-2xl flex items-center justify-center p-2">
+            <img src="/img/nex-one.png" alt="NexOne" className="w-full h-full object-contain" />
           </div>
         </div>
 
@@ -109,10 +108,10 @@ export default function LoginPage() {
 
         <div className="relative w-full max-w-md">
           <div className="lg:hidden text-center mb-8">
-            <div className="inline-flex w-20 h-20 rounded-2xl shadow-lg items-center justify-center p-3">
-              <img src="/img/nexora-rev1.png" alt="Nexora" className="w-full h-full object-contain" />
+            <div className="inline-flex w-28 h-22 rounded-2xl shadow-lg items-center justify-center p-3">
+              <img src="/img/nex-one.png" alt="nexone" className="w-full h-full object-contain" />
             </div>
-            <h1 className="mt-4 text-2xl font-bold text-slate-800">Nexora IT System</h1>
+            <h1 className="mt-4 text-2xl font-bold text-slate-800">NexONE IT System</h1>
             <p className="text-sm text-slate-500">PT. Unggul Dinamika Utama</p>
           </div>
 

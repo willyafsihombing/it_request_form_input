@@ -53,4 +53,12 @@ export const approvalApi = {
     request<{ message: string }>(`/api/approval-routes/${id}`, { method: 'DELETE' }),
   readiness: (departemen: string) =>
     request<Readiness>(`/api/approval-routes/readiness?departemen=${encodeURIComponent(departemen)}`),
+
+    mySignature: () => request<{ image: string; has: boolean }>('/api/me/signature'),
+  saveMySignature: (image: string) =>
+    request<{ saved: boolean }>('/api/me/signature', { method: 'PUT', body: JSON.stringify({ image }) }),
+  deleteMySignature: () =>
+    request<{ deleted: boolean }>('/api/me/signature', { method: 'DELETE' }),
+  signatures: (id: string) =>
+    request<{ signatures: Record<string, string> }>(`/api/requests/${id}/signatures`),
 };

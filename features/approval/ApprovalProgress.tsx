@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Check, X, Loader2, Minus, Clock, CornerDownRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -33,13 +34,21 @@ export default function ApprovalProgress({ requestId }: { requestId: string }) {
   const [legacy, setLegacy] = useState(false);
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState('');
+  const [sigMissing, setSigMissing] = useState(false);
+
+  useEffect(() => {
+    if (!data?.canAct || data.status !== 'in_review') return;
+    approvalApi.mySignature()
+      .then(r => setSigMissing(!r?.has))
+      .catch(() => {});
+  }, [data?.canAct, data?.status]);
 
   const load = useCallback(async () => {
     try {
       setData(await approvalApi.progress(requestId));
       setLegacy(false);
     } catch {
-      setLegacy(true); // request lama tanpa alur approval
+      setLegacy(true); 
     }
   }, [requestId]);
 
@@ -71,7 +80,9 @@ export default function ApprovalProgress({ requestId }: { requestId: string }) {
       await load();
       router.refresh();
     } catch (e) {
-      dialog.error(e instanceof Error ? e.message : 'Gagal memproses.', 'Gagal');
+      const msg = e instanceof Error ? e.message : 'Gagal memproses.';
+      if (msg.includes('Tanda Tangan Saya')) setSigMissing(true);
+      dialog.error(msg, 'Gagal');
       await load();
     } finally {
       setBusy(false);
@@ -116,6 +127,15 @@ export default function ApprovalProgress({ requestId }: { requestId: string }) {
 
       {data.canAct && data.status === 'in_review' && (
         <div className="space-y-2 border-t border-slate-100 pt-3">
+          {sigMissing && (
+            <div className="rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+              Anda belum mengunggah tanda tangan.{' '}
+              <Link href="/dashboard/signature" className="font-semibold underline">
+                Unggah di Tanda Tangan Saya
+              </Link>{' '}
+              sebelum menyetujui.
+            </div>
+          )}
           <textarea
             value={note}
             onChange={e => setNote(e.target.value)}

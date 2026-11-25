@@ -3,14 +3,19 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
-  LayoutDashboard, ClipboardList, Settings, //FilePlus2 -> untuk sidebar buat request
+  LayoutDashboard, ClipboardList, Settings,
   Monitor, Building2, ChevronRight,
   UserCircle, Users,
   type LucideIcon,
+  ClipboardCheck,
+  Inbox,
+  ChevronDown,
+  PenLine,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import LogoutButton from '@/features/auth/components/logoutButton';
 import { useEffect, useState } from 'react';
+import { approvalApi } from '@/lib/approval-api';
 
 type NavItem = {
   href: string;
@@ -19,11 +24,52 @@ type NavItem = {
   adminOnly?: boolean;
 };
 
-const NAV_ITEMS: NavItem[] = [
+type NavLeaf = {
+  href: string;
+  label: string;
+  icon: LucideIcon;
+  adminOnly?: boolean;
+  badge?: boolean; // tampilkan jumlah persetujuan yang menunggu
+};
+
+type NavGroup = {
+  key: string;
+  label: string;
+  icon: LucideIcon;
+  children: NavLeaf[];
+};
+
+type NavEntry = NavLeaf | NavGroup
+
+const isGroup = (e: NavEntry): e is NavGroup => 'children' in e
+
+const NAV_ITEMS: NavEntry[] = [
   { href: '/dashboard',           label: 'Dashboard',            icon: LayoutDashboard },
   { href: '/dashboard/employees', label: 'Master Data Karyawan', icon: Users, adminOnly: true },
   { href: '/dashboard/requests',  label: 'IT Requests',          icon: ClipboardList   },
-  { href: '/dashboard/approval-routes', label: 'Alur Persetujuan', icon: Settings, adminOnly: true },
+  {
+    key: 'itr-approval',
+    label:'Persetujuan Approval',
+    icon: ClipboardCheck,
+    children: [
+      // { href: '/dashboard/approvals',       label: 'Kotak Persetujuan', icon: Inbox, badge: true },
+      { href: '/dashboard/approval-routes', label: 'Alur Persetujuan ITR',  icon: Settings, adminOnly: true },
+      { href: '/dashboard/signature', label: 'Tanda Tangan Saya', icon: PenLine },
+
+      // { href: '/dashboard/wo-routes',    label: 'Alur Persetujuan  WO',  icon: Settings, adminOnly: true },
+
+    ],
+  },
+  // {
+  //   key: 'wo-approval',
+  //   label: 'Persetujuan Work Order',
+  //   icon: ClipboardCheck,
+  //   children: [
+  //     { href: '/dashboard/wo-approvals', label: 'Kotak Persetujuan', icon: Inbox },
+  //     { href: '/dashboard/wo-routes',    label: 'Alur Persetujuan',  icon: Settings, adminOnly: true },
+  //   ],
+  // },
+  // { href: '/form',               label: 'Buat Request',    icon: FilePlus2       }, -> buat request sementara di hilangkan dahulu
   // { href: '/form',               label: 'Buat Request',    icon: FilePlus2       }, -> buat request sementara di hilangkan dahulu
 ];
 
@@ -34,6 +80,8 @@ export default function Sidebar() {
     role: string;
     department:string;
   } | null>(null)
+  const [pending, setPending] = useState(0)
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     const useStr = localStorage.getItem('auth-user');
@@ -46,6 +94,17 @@ export default function Sidebar() {
     }
   }, [])
 
+  useEffect(() => {
+    let alive = true;
+    approvalApi.inboxCount()
+    .then((r: any) => {
+      if (!alive) return;
+      setPending(typeof r === 'number' ? r : Number(r?.count ?? 0));
+    })
+    .catch(()=> {if (alive) setPending(0);});
+  return () => { alive = false;};
+  }, [pathname])
+
   const isActive = (href: string) =>
     href === '/dashboard'
       ? pathname === '/dashboard'
@@ -57,21 +116,36 @@ export default function Sidebar() {
     staff:    'Staff',
   };
 
-  // Sembunyikan menu khusus admin dari role lain
-  const visibleItems = NAV_ITEMS.filter(
-    (item) => !item.adminOnly || currentUser?.role === 'admin'
-  );
+   const canSee = (leaf: NavLeaf) => !leaf.adminOnly || currentUser?.role === 'admin';
+
+   const linkClass = (active: boolean) => cn (
+     'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150',
+    active
+      ? 'bg-sky-500/20 text-sky-400 shadow-sm'
+      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/70'
+    )
+
+    const Badge = ({ n } : { n: number}) =>
+      n > 0 ? (
+        <span
+        style={{
+          minWidth: 20, height: 20, padding: '0 6px', borderRadius: 10,
+          background: '#ef4444', color: '#fff', fontSize: 11, fontWeight: 700,
+          display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+        }}
+      >
+        {n > 99 ? '99+' : n}
+      </span>
+    ) : null;
 
   return (
     <aside className=" no-print fixed inset-y-0 left-0 z-50 w-64 bg-slate-900 flex flex-col">
       <div className="px-7 py-5 border-b border-slate-700/60">
-        <div className="flex items-center gap-2">
-          <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0">
+        <div className="flex items-center gap-5">
+          <div className="h-10 w-auto rounded-xl bg-white shadow-md ring-1 ring-slate-200 flex items-center justify-center flex-shrink-0">
             <img
-              src="/img/nexora-rev1.png"
+              src="/img/nex-one.png"
               alt='logo-unggul'
-              width={2}
-              height={2}
               className='w-full h-full object-contain'
             />
           </div>
@@ -118,23 +192,63 @@ export default function Sidebar() {
       <nav className="flex-1 px-3 py-2 space-y-1 overflow-y-auto scrollbar-thin">
         <p className="text-slate-500 text-xs font-semibold uppercase tracking-wider px-2 mb-2 mt-1">Menu</p>
 
-        {visibleItems.map(({ href, label, icon: Icon }) => {
-          const active = isActive(href);
+        {NAV_ITEMS.map(entry => {
+          if (!isGroup(entry)) {
+            if (!canSee(entry)) return null;
+            const { href, label, icon: Icon } = entry;
+            const active = isActive(href);
+            return (
+              <Link key={href} href={href} className={linkClass(active)}>
+                <Icon size={17} className="flex-shrink-0" />
+                <span className="flex-1">{label}</span>
+                {active && <ChevronRight size={14} className="text-sky-400/60" />}
+              </Link>
+            );
+          }
+          const children = entry.children.filter(canSee);
+          if (children.length === 0) return null;
+          const GroupIcon = entry.icon;
+          const groupActive = children.some(c => isActive(c.href));
+          const open = openGroups[entry.key] ?? groupActive; // otomatis terbuka bila salah satu anak aktif
+          const groupBadge = children.some(c => c.badge) ? pending : 0;
+
           return (
-            <Link
-              key={href}
-              href={href}
-              className={cn(
-                'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150',
-                active
-                  ? 'bg-sky-500/20 text-sky-400 shadow-sm'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/70'
+            <div key={entry.key}>
+              <button
+                type="button"
+                onClick={() => setOpenGroups(o => ({ ...o, [entry.key]: !open }))}
+                className={linkClass(false)}
+                style={{ width: '100%', color: groupActive ? '#38bdf8' : undefined }}
+              >
+                <GroupIcon size={17} className="flex-shrink-0" />
+                <span className="flex-1 text-left">{entry.label}</span>
+                {!open && <Badge n={groupBadge} />}
+                <ChevronDown
+                  size={14}
+                  style={{ transition: 'transform .15s', transform: open ? 'rotate(180deg)' : 'none', opacity: 0.6 }}
+                />
+              </button>
+
+              {open && (
+                <div className="mt-1 space-y-1">
+                  {children.map(({ href, label, icon: Icon, badge }) => {
+                    const active = isActive(href);
+                    return (
+                      <Link
+                        key={href}
+                        href={href}
+                        className={linkClass(active)}
+                        style={{ paddingLeft: 40 }}
+                      >
+                        <Icon size={15} className="flex-shrink-0" />
+                        <span className="flex-1">{label}</span>
+                        {badge && <Badge n={pending} />}
+                      </Link>
+                    );
+                  })}
+                </div>
               )}
-            >
-              <Icon size={17} className="flex-shrink-0" />
-              <span className="flex-1">{label}</span>
-              {active && <ChevronRight size={14} className="text-sky-400/60" />}
-            </Link>
+            </div>
           );
         })}
       </nav>
