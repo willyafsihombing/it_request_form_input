@@ -125,14 +125,14 @@ function StatCard({
   tone: string;
 }) {
   return (
-    <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 flex items-center gap-4">
+    <div className="min-w-0 bg-white rounded-xl border border-slate-200 shadow-sm p-3 sm:p-4 flex items-center gap-3 sm:gap-4">
       <div>
       <div className={`w-9 h-9 shrink-0 rounded-full flex items-center justify-center text-white ${tone}`}>
         {icon}
       </div>
       <div className='min-w-0'>
-        <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">{label}</p>
-        <p className="text-lg font-bold text-slate-800">{value}</p>
+        <p className="text-[10px] sm:text-[11px] font-semibold text-slate-400 uppercase tracking-wider truncate">{label}</p>
+        <p className="text-base sm:text-lg font-bold text-slate-800">{value}</p>
       </div>
     </div>
     </div>
@@ -238,7 +238,7 @@ export default function EmployeeList() {
   const [emails, setEmails] = useState<Record<string, string>>({});
 
 
-  
+
 
   useEffect(() => {
     try {
@@ -374,7 +374,7 @@ export default function EmployeeList() {
   const eligable = items.filter(e => e.isActive && !accounts[e.id])
 
   return (
-    <div className="flex-1 p-6">
+    <div className="flex-1 min-w-0 p-4 md:p-6">
       {/* Header */}
       <div className="flex items-start justify-between flex-wrap gap-3 mb-6">
         <div>
@@ -400,35 +400,13 @@ export default function EmployeeList() {
             </button>
           </div>
 
-          <div className="relative">
-            {/* <button
-              type="button"
-              onClick={() => setExportOpen(o => !o)}
-              className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 text-sm font-semibold rounded-xl hover:bg-slate-50"
-            >
-              <Download size={14} /> Export <ChevronDown size={14} />
-            </button> */}
-            {/* {exportOpen && (
-              <div className="absolute right-0 mt-1 w-52 bg-white border border-slate-200 rounded-xl shadow-lg z-20 py-1">
-                <button
-                  type="button"
-                  onClick={exportCsv}
-                  disabled={items.length === 0}
-                  className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 disabled:text-slate-300"
-                >
-                  CSV (data di halaman ini)
-                </button>
-              </div>
-            )} */}
-          </div>
-
           {/* {canManage && (
             <button
               type="button"
               onClick={() => setImportOpen(true)}
               className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 text-sm font-semibold rounded-xl hover:bg-slate-50"
-            >Import Exce
-              <Upload size={14} /> l
+            >Import Excel
+              <Upload size={14} />
             </button>
           )} */}
 
@@ -438,7 +416,7 @@ export default function EmployeeList() {
               onClick={() =>
                 setAccountModal({mode: 'create', ids: selected.length > 0 ? selected : undefined })
               }
-                className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 text-sm font-semibold rounded-xl hover:bg-slate-50"
+                className="flex items-center gap-2 px-4 py-2 b+g-white border border-slate-200 text-slate-700 text-sm font-semibold rounded-xl hover:bg-slate-50"
             >
               <UserPlus size={14} />
               {selected.length > 0 ? `Buat Akun (${selected.length})` : 'Buat Akun Massal'}
@@ -458,8 +436,8 @@ export default function EmployeeList() {
       </div>
 
       <div
-        className="mb-6"
-        style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 16 }}
+        className="mb-6 grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-3"
+        
       >
         <StatCard
           label="Total Karyawan"
@@ -502,7 +480,7 @@ export default function EmployeeList() {
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="flex items-center justify-between flex-wrap gap-3 px-5 py-4 border-b border-slate-100">
           <h2 className="text-base font-semibold text-slate-800">Daftar Karyawan</h2>
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="grid grid-cols-2 sm:flex sm:flex-wrap sm:items-center gap-2 w-full sm:w-auto [&>select]:w-full sm:[&>select]:w-auto">
             <select
               className={SELECT_CLASS}
               value={departemen}

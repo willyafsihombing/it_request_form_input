@@ -206,11 +206,6 @@ export default function RequestsTable() {
                     <p className="font-medium text-slate-800 whitespace-nowrap">{req.recPersonnel || '—'}</p>
                     <p className="text-xs text-slate-400 mt-0.5">{req.recDept} · {req.recLocation}</p>
                   </td>
-                  {/* <td className="px-4 py-3 max-w-[200px]">
-                    <p className="text-slate-600 text-xs line-clamp-2 whitespace-pre-line">
-                      {req.additionalDesc || '—'}
-                    </p>
-                  </td> */}
                   <td className="px-4 py-3">
                     <StatusBadge status={req.status as RequestStatus} />
                   </td>

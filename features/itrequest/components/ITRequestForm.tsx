@@ -190,7 +190,7 @@ export default function ITRequestForm({mode = 'create', requestId, initial}: Pro
 
   const lockedToList = role === 'user';
 
-  console.log('recPersonnel state =', JSON.stringify(data.recPersonnel));
+  // console.log('recPersonnel state =', JSON.stringify(data.recPersonnel));
 
   return (
     <div className="max-w-4xl mx-auto">

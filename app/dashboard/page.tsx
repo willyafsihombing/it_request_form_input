@@ -33,7 +33,7 @@
       setUserLoaded(true)
     },[]);
 
-    const isAdminOrIT = currentUser?.role === 'admin' || currentUser?.role === 'itstaff' || currentUser?.role === 'staff'
+    const isAdminOrIT = currentUser?.role === 'admin' || currentUser?.role === 'staff'
 
     useEffect(() => {
       if (!userLoaded) return;
@@ -69,7 +69,7 @@
     ];
 
     return (
-      <div className="flex-1 min-w-0 p-6 space-y-6">
+      <div className="flex-1 min-w-0 p-4 md:p-6 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -83,7 +83,7 @@
           </Link> */}
         </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 md:gap-4">
           {STATS.map((s) => (
             <StatsCard key={s.title} {...s} />
           ))}
@@ -101,8 +101,8 @@
             </Link>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+          <div className="hidden md:block w-full overflow-x-auto">
+            <table className="w-full min-w-[820px] text-sm">
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-100">
                   <th className="text-left px-5 py-3 font-semibold text-slate-500 text-xs uppercase tracking-wider">No. Form</th>
@@ -183,7 +183,73 @@
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="md:hidden divide-y divide-slate-100">
+          {loading ? (
+            <p className="text-center py-12 text-slate-400 text-sm">Memuat data...</p>
+          ) : recent.length === 0 ? (
+            <p className="text-center py-12 text-slate-400 text-sm">
+              Belum ada request.{' '}
+              <Link href="/form" className="text-sky-600 underline">Buat request pertama</Link>
+            </p>
+          ) : (
+            recent.map((req: any) => (
+              <div key={req.id} className="p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <span className="font-mono text-xs font-semibold text-sky-700 bg-sky-50 px-2 py-0.5 rounded break-all">
+                    {req.formNumber}
+                  </span>
+                  <StatusBadge status={req.status as RequestStatus} />
+                </div>
+
+                <p className="mt-2 text-sm font-medium text-slate-800">{req.reqName || '—'}</p>
+                <p className="mt-0.5 text-xs text-slate-500">
+                  Penerima: {req.recPersonnel || '—'}
+                  {req.recDept ? ` · ${req.recDept}` : ''}
+                  {req.recLocation ? ` · ${req.recLocation}` : ''}
+                </p>
+
+                <p className="mt-2 text-xs text-slate-600 line-clamp-2">
+                  {req.additionalDesc || req.hwOther || '—'}
+                </p>
+
+                <div className="mt-3 flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <PriorityBadge priority={req.priority as RequestPriority} />
+                    <span className="text-xs text-slate-400 truncate">{timeAgo(req.createdAt)}</span>
+                  </div>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <Link
+                      href={`/dashboard/requests/${req.id}`}
+                      className="p-2 rounded-lg text-slate-400 hover:text-sky-600 hover:bg-sky-50 transition-colors"
+                      title="Detail"
+                    >
+                      <ClipboardList size={16} />
+                    </Link>
+                    {(req.status === 'approved' || isAdminOrIT) ? (
+                      <Link
+                        href={`/dashboard/requests/${req.id}/print`}
+                        target="_blank"
+                        className="p-2 rounded-lg text-slate-400 hover:text-green-600 hover:bg-green-50 transition-colors"
+                        title="Cetak"
+                      >
+                        <Printer size={16} />
+                      </Link>
+                    ) : (
+                      <span
+                        className="p-2 rounded-lg text-slate-200 cursor-not-allowed"
+                        title="Print hanya tersedia setelah request di approve oleh IT"
+                      >
+                        <Printer size={16} />
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
             <h3 className="font-semibold text-slate-700 mb-4">Distribusi Status</h3>
             <div className="space-y-3">

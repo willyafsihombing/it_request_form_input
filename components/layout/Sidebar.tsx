@@ -10,6 +10,8 @@ import {
   ClipboardCheck,
   Inbox,
   ChevronDown,
+  Menu,
+  X,
   PenLine,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -82,6 +84,7 @@ export default function Sidebar() {
   } | null>(null)
   const [pending, setPending] = useState(0)
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
+  const [mobileOpen, setMobileOpen] = useState(false)
 
   useEffect(() => {
     const useStr = localStorage.getItem('auth-user');
@@ -105,6 +108,10 @@ export default function Sidebar() {
   return () => { alive = false;};
   }, [pathname])
 
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname])
+
   const isActive = (href: string) =>
     href === '/dashboard'
       ? pathname === '/dashboard'
@@ -112,14 +119,13 @@ export default function Sidebar() {
 
   const roleLabel: Record<string, string> = {
     admin:    'Administrator',
-    itstaff:  'IT Staff',
-    staff:    'Staff',
+    staff:    'IT Staff',
   };
 
    const canSee = (leaf: NavLeaf) => !leaf.adminOnly || currentUser?.role === 'admin';
 
    const linkClass = (active: boolean) => cn (
-     'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150',
+     'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150','md:justify-center lg:justify-start',
     active
       ? 'bg-sky-500/20 text-sky-400 shadow-sm'
       : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/70'
@@ -139,25 +145,54 @@ export default function Sidebar() {
     ) : null;
 
   return (
-    <aside className=" no-print fixed inset-y-0 left-0 z-50 w-64 bg-slate-900 flex flex-col">
-      <div className="px-7 py-5 border-b border-slate-700/60">
-        <div className="flex items-center gap-5">
-          <div className="h-10 w-auto rounded-xl bg-white shadow-md ring-1 ring-slate-200 flex items-center justify-center flex-shrink-0">
+    <>
+    <button
+    type="button"
+    onClick={() => setMobileOpen(true)}
+    aria-label="Buka Menu"
+    className="no-print fixed top-3 left-3 z-40 md:hidden p-2 rounded-lg bg-slate-900 text-slate-200 shadow-lg ring-1 ring-slate-700"
+    >
+      <Menu size={20}/>
+    </button>
+
+    {mobileOpen && (
+      <div 
+        className="no-print fixed inset-0 z-40 bg-black/50 md:hidden"
+        onClick={() => setMobileOpen(false)}
+        aria-hidden="true">
+      </div>
+    )}
+    <aside 
+      className={cn("no-print fixed inset-y-0 z-50 w-64 bg-slate-900 flex flex-col transition-[left] duration-200",
+      mobileOpen ? "left-0" : "-left-64",
+      "md:left-0 md:w-20 lg:w-64" 
+      )}
+    >
+      <button
+      type="button"
+      onClick={() => setMobileOpen(false)}
+      aria-label="Tutup Menu"
+      className="absolute top-3 right-3 p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 md:hidden">
+        <X size={18}/>
+      </button>
+      <div className="px-7 py-5 border-b border-slate-700/60 md:px-2 md:py-4 lg:px-7 lg:py-5">
+        <div className="flex items-center gap-5 md:justify-center lg:justify-start">
+          <div className="h-10 w-auto md:w-14 lg:w-auto rounded-xl bg-white shadow-md ring-1 ring-slate-200 flex items-center justify-center flex-shrink-0 px-1">
             <img
               src="/img/nex-one.png"
               alt='logo-unggul'
               className='w-full h-full object-contain'
             />
           </div>
-        <div>
+        <div className="md:hidden lg:block">
             <p className="text-white font-bold text-sm leading-tight"></p>
             <p className="text-slate-200 text-[12px] font-medium leading-tight">One Platform. Everything Connected.</p>
           </div>
         </div>
       </div>
 
-      <div className="mx-4 my-3 px-3 py-2 bg-slate-800/60 rounded-lg border border-slate-700/50">
-        <div className="flex items-center gap-2">
+      <div className="mx-4 my-3 px-3 py-2 bg-slate-800/60 rounded-lg border border-slate-700/50 md:mx-1 lg:mx-4 lg:px-3">
+        <div className="flex items-center gap-2 md:justify-center lg:justify-start">
           <div className="w-9 h-9 rounded-xl bg-sky-100 flex items-center justify-center flex-shrink-0">
             <img
               src="/img/logo.png"
@@ -167,17 +202,17 @@ export default function Sidebar() {
               className='w-full h-full object-contain'
             />
           </div>
-            <span className="text-slate-300 text-xs font-medium leading-tight">PT. Unggul Dinamika Utama</span>
+            <span className="text-slate-300 text-xs font-medium leading-tight md:hidden lg:inline">PT. Unggul Dinamika Utama</span>
         </div>
       </div>
 
       {currentUser && (
-        <div className="mx-4 mb-3 px-3 py-2.5 bg-sky-500/10 rounded-lg border border-sky-500/20">
-          <div className="flex items-center gap-2.5">
+        <div className="mx-4 mb-3 px-3 py-2.5 bg-sky-500/10 rounded-lg border border-sky-500/20 md:mx-2 lg:mx-4 lg:px-3">
+          <div className="flex items-center gap-2.5 md:justify-center lg:justify-start">
             <div className="w-8 h-8 rounded-full bg-sky-500/20 flex items-center justify-center flex-shrink-0">
               <UserCircle size={18} className="text-sky-400" />
             </div>
-            <div className="min-w-0">
+            <div className="min-w-0 md:hidden lg:block">
               <p className="text-white text-xs font-semibold truncate">
                 {currentUser.fullName}
               </p>
@@ -189,8 +224,8 @@ export default function Sidebar() {
         </div>
       )}
 
-      <nav className="flex-1 px-3 py-2 space-y-1 overflow-y-auto scrollbar-thin">
-        <p className="text-slate-500 text-xs font-semibold uppercase tracking-wider px-2 mb-2 mt-1">Menu</p>
+      <nav className="flex-1 px-3 py-2 space-y-1 overflow-y-auto scrollbar-thin md:px-2 lg:px-3">
+        <p className="text-slate-500 text-xs font-semibold uppercase tracking-wider px-2 mb-2 mt-1 md:hidden lg:block ">Menu</p>
 
         {NAV_ITEMS.map(entry => {
           if (!isGroup(entry)) {
@@ -198,10 +233,10 @@ export default function Sidebar() {
             const { href, label, icon: Icon } = entry;
             const active = isActive(href);
             return (
-              <Link key={href} href={href} className={linkClass(active)}>
+              <Link key={href} href={href} title={label} className={linkClass(active)}>
                 <Icon size={17} className="flex-shrink-0" />
-                <span className="flex-1">{label}</span>
-                {active && <ChevronRight size={14} className="text-sky-400/60" />}
+                <span className="flex-1 md:hidden lg:block">{label}</span>
+                {active && <ChevronRight size={14} className="text-sky-400/60 md:hidden lg:block" />}
               </Link>
             );
           }
@@ -217,7 +252,7 @@ export default function Sidebar() {
               <button
                 type="button"
                 onClick={() => setOpenGroups(o => ({ ...o, [entry.key]: !open }))}
-                className={linkClass(false)}
+                className={cn(linkClass(false), 'md:hidden lg:flex' )}
                 style={{ width: '100%', color: groupActive ? '#38bdf8' : undefined }}
               >
                 <GroupIcon size={17} className="flex-shrink-0" />
@@ -228,45 +263,48 @@ export default function Sidebar() {
                   style={{ transition: 'transform .15s', transform: open ? 'rotate(180deg)' : 'none', opacity: 0.6 }}
                 />
               </button>
-
-              {open && (
-                <div className="mt-1 space-y-1">
+                <div className={cn("mt-1 space-y-1", open ? 'block' : 'hidden md:block lg:hidden')}>
                   {children.map(({ href, label, icon: Icon, badge }) => {
                     const active = isActive(href);
                     return (
                       <Link
                         key={href}
                         href={href}
-                        className={linkClass(active)}
-                        style={{ paddingLeft: 40 }}
+                        title={label}
+                        className={cn(linkClass(active), 'pl-10 md:pl-3 lg:pl-10')}
                       >
                         <Icon size={15} className="flex-shrink-0" />
-                        <span className="flex-1">{label}</span>
-                        {badge && <Badge n={pending} />}
+                        <span className="flex-1 md:hidden lg:block">{label}</span>
+                        {badge && <span className="md:hidden lg:block"><Badge n={pending} /></span>}
                       </Link>
                     );
                   })}
                 </div>
-              )}
             </div>
           );
         })}
       </nav>
-      <div className="mt-auto p-4 border-t border-slate-100">
-            <span></span>
-            <LogoutButton />
+      <div
+        className="mt-auto p-4 border-t border-slate-700/60 md:p-2 lg:p-4
+            flex flex-col md:items-center lg:items-stretch overflow-hidden
+            md:[&_span]:hidden lg:[&_span]:inline
+            md:[&_button]:w-auto md:[&_button]:px-3 lg:[&_button]:w-full
+            [&_button]:max-w-full [&_button]:min-w-0"
+      >
+        <LogoutButton />
       </div>
 
       {/* Footer */}
-      <div className="px-4 py-4 border-t border-slate-700/60">
+      <div className="px-4 py-4 border-t border-slate-700/60 md:px-2 lg:px-4">
         <Link
           href="/dashboard"
-          className="flex items-center gap-2 text-slate-500 hover:text-slate-300 text-xs transition-colors"
+          className="flex items-center gap-2 text-slate-500 hover:text-slate-300 text-xs transition-colors md:justify-center lg:justify-start"
         >
           <Settings size={13} />
           <span>v1.0.0 — Admin Panel</span>
         </Link>
       </div>
     </aside>
+  </>
   );
 }

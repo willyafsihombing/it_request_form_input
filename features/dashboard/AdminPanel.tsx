@@ -48,7 +48,7 @@ export default function AdminPanel({ request }: { request: ITRequest }) {
   }
 }, []);
 
-  const isITStaff = userRole === 'staff' || userRole === 'itstaff';
+  const isITStaff = userRole === 'staff';
   const isAdmin = userRole === 'admin';
   const isApproved = request.status === 'approved'
   const usesApproval = !!request.approvalStatus
